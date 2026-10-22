@@ -1,44 +1,104 @@
+<div align="center">
+
+<img src="assets/icon.png" width="96" alt="Odak Studio">
+
 # Odak Studio
 
-Windows için sade, yerel çalışan video, fotoğraf, GIF ve toplu işlem stüdyosu. Tüm işlemler
-bilgisayarında yapılır; hiçbir dosya internete yüklenmez.
+**Kaliteden ödün vermeyen, ücretsiz ve açık kaynak video, fotoğraf ve GIF stüdyosu.**
+Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayarından hiç çıkmaz.
 
-## Öne çıkanlar
+[![Son sürüm](https://img.shields.io/github/v/release/EfeKesgin/odak-studio?label=s%C3%BCr%C3%BCm)](https://github.com/EfeKesgin/odak-studio/releases/latest)
+[![Testler](https://github.com/EfeKesgin/odak-studio/actions/workflows/test.yml/badge.svg)](https://github.com/EfeKesgin/odak-studio/actions/workflows/test.yml)
+[![Lisans: GPL-3.0](https://img.shields.io/badge/lisans-GPL--3.0-blue)](LICENSE)
+![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6)
+
+### [⬇ Windows için indir](https://github.com/EfeKesgin/odak-studio/releases/latest)
+
+<sub>Sürüm sayfasındaki <code>OdakStudio-Setup-….exe</code> dosyasını indirip çalıştır. Yeni sürümler uygulama içinden kendiliğinden gelir.</sub>
+
+</div>
+
+![Video düzenleyici](docs/screenshots/video.png)
+
+## Neler yapabilir?
+
+| | |
+| --- | --- |
+| **Video** | Kayıpsız kesim (yeniden kodlama yok), çok bölümlü kesim, kırpma, döndürme, boyutlandırma, hız. H.264 / H.265 / VP9 / ProRes. |
+| **Hedef boyut** | "Bu video 10 MB olsun" de, gerisini o halletsin: Discord, WhatsApp, e-posta için hazır ayarlar. |
+| **Metin ve altyazı** | Videoya, fotoğrafa ve GIF'e yazı veya filigran; altyazıyı videoya yakma. |
+| **Hız** | NVIDIA, Intel ve AMD ekran kartlarıyla birkaç kat daha hızlı kodlama (varsa). |
+| **Fotoğraf** | Kırp, döndür, boyutlandır; JPEG, PNG, WebP, AVIF, TIFF. Renk profili ve EXIF korunur. |
+| **GIF** | Video ve fotoğraflardan GIF; klip sırası, kırpma, hız, FPS, üst/alt yazı. |
+| **Toplu işlem** | Yüzlerce dosyayı aynı ayarla dönüştür; videoları tek dosyada birleştir. |
+| **Dil** | Türkçe ve İngilizce arayüz. |
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/photo.png" alt="Fotoğraf düzenleyici"></td>
+    <td><img src="docs/screenshots/gif.png" alt="GIF stüdyosu"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Fotoğrafa filigran</sub></td>
+    <td align="center"><sub>GIF stüdyosu</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/merge.png" alt="Videoları birleştirme"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><sub>Farklı boyuttaki videoları tek dosyada birleştirme</sub></td>
+  </tr>
+</table>
+
+## Neden güvenilir?
+
+- **Açık kaynak:** Kodun tamamı bu sayfada; ne yaptığını herkes görebilir ve denetleyebilir.
+- **İnternete bir şey göndermez:** Tüm işlemler senin bilgisayarında yapılır. Uygulamanın
+  internete tek bağlantısı, açılışta GitHub'da yeni sürüm olup olmadığına bakmaktır (internet
+  yoksa uygulama normal çalışır).
+- **Gizli ücret yok:** Deneme süresi, filigran, kısıtlı özellik veya hesap yok.
+
+### Windows "tanınmayan uygulama" uyarısı
+
+Odak Studio ücretsiz bir proje olduğu için kurulum dosyası ücretli bir kod imzalama
+sertifikasıyla imzalanmamıştır. Bu yüzden Windows SmartScreen ilk kurulumda bir uyarı
+gösterebilir: **Ek bilgi → Yine de çalıştır**'a tıklayarak devam edebilirsin. Dosyayı yalnızca bu
+sayfadaki [Sürümler](https://github.com/EfeKesgin/odak-studio/releases) bölümünden indir.
+
+## English
+
+**Odak Studio** is a free, open-source, quality-first video, photo and GIF studio for Windows.
+Lossless trimming, multi-segment cuts, target file size (e.g. "fit into 10 MB"), text and
+watermarks, subtitle burn-in, GPU encoding (NVENC / Quick Sync / AMF), batch conversion and video
+merging. Everything runs locally; no account, ads or watermarks. The interface is available in
+English and Turkish (Help → Language).
+[Download for Windows](https://github.com/EfeKesgin/odak-studio/releases/latest).
+
+---
+
+## Geliştiriciler için
+
+Aşağıdaki bölümler projeyi kaynaktan çalıştırmak, paketlemek ve katkıda bulunmak içindir.
+
+### Teknik ayrıntılar
 
 - **Videoda kalite koruması:** Görsel değişiklik yoksa (kesim dışında) akış kopyalama (stream copy)
-  ile yeniden kodlama yapılmaz. Yeniden kodlama gerekliyse varsayılan CRF 16 ve yüksek kaliteli
-  ayarlar kullanılır.
-- **Video düzenleme:** Kesim, döndürme, yatay/dikey çevirme, kırpma, yeniden boyutlandırma,
-  hız değiştirme, ses modu, kodek (H.264 / H.265 / VP9 / ProRes) ve kalite modu (kopya / CRF /
-  bit hızı / hedef dosya boyutu).
+  ile yeniden kodlama yapılmaz. Yeniden kodlama gerekliyse varsayılan CRF 16 kullanılır. Ek ses
+  dilleri ve altyazı izleri çıktıya taşınır.
+- **Hedef dosya boyutu:** İki geçişli kodlama; çıktı hedefi aşarsa bir kez daha düşük bit hızıyla
+  düzeltilir. GPU'da kodlayıcının kendi çok geçişli modu kullanılır.
 - **Çok bölümlü kesim:** `I` / `O` ile giriş/çıkış noktası, `B` ile seçimi bölüm olarak ekleme.
-  Bölümler sırayla tek dosyada birleşir; kopya modunda yeniden kodlama olmadan.
-- **Hedef dosya boyutu:** "Bu videoyu 10 MB'a sığdır" — iki geçişli kodlama; çıktı hedefi
-  aşarsa bir kez daha düşük bit hızıyla düzeltilir.
-- **Hazır ayarlar:** YouTube, Instagram/TikTok, WhatsApp, Discord, e-posta, arşiv; kendi
-  ayarlarını kaydetme. Son kullanılan ayarlar (video, fotoğraf, GIF, toplu) hatırlanır.
-- **Metin ve altyazı:** Video, fotoğraf ve GIF'e yazı/filigran (yazı tipi, renk, kenarlık,
-  gölge, kutu, konum, videoda zamanlama); önizlemede sürükleyerek yerleştirme. Videodaki metin
-  altyazı izi görüntüye yakılabilir. Ek ses dilleri ve altyazılar çıktıya taşınır.
-- **Donanım hızlandırma:** NVIDIA NVENC, Intel Quick Sync, AMD AMF (H.264/H.265). Açılışta
-  gerçekten çalışan kodlayıcılar test edilir; yoksa işlemciyle kodlanır.
-- **Video birleştirme:** Toplu işlemdeki "Birleştir" sekmesi. Uyumlu videolar kayıpsız, farklı
-  boyut/kare hızındakiler ortak tuvale getirilerek tek dosyada birleştirilir.
-- **Türkçe / İngilizce arayüz:** İlk açılışta sistem dili, sonra Yardım ekranından seçilir.
-- **Fotoğraf düzenleme:** Döndürme, çevirme, kırpma, yeniden boyutlandırma, format (orijinal,
-  JPEG, PNG, WebP, AVIF, TIFF), kalite ve meta veri koruma. Biçim değişmezse ve düzenleme
-  yapılmazsa dosya birebir kopyalanır.
-- **GIF stüdyosu:** Video ve fotoğrafları sırayla birleştirme, klipleri sürükleyerek veya
-  oklarla sıralama; her klip için kesim/süre, hız ve merkezî kırpma; global tuval oranı,
-  genişlik, FPS ve döngü sayısı. Çıktı, FFmpeg'in palet tabanlı GIF kodlayıcısıyla üretilir.
-- **Toplu işlem:** Video, fotoğraf ve GIF için ayrı kuyruklar; çoklu dosya ekleme, ortak
-  codec/kalite/boyut veya format/çözünürlük ayarları, sıralı ilerleme, dosya bazlı hata
-  toleransı, yeniden deneme ve iptal. Her dosya kendi adıyla ayrı kaydedilir.
-- **Önizleme:** Kare kaydetme (uygulanan döndürme/çevirme/kırpma/boyut ile),
-  film şeridi, GIF önizlemesi ve yerel medya sunucusu üzerinden oynatma.
-- **Derin renk:** 16-bit kaynak desteği ve ICC profili koruması (örn. Display P3).
+  Kopya modunda bölümler ayrı kesilip concat ile, yeniden kodlamada tek filtre grafiğinde birleşir.
+- **Metin katmanları:** Video ve GIF'te libass (ASS), fotoğrafta SVG ile çizilir; önizleme ile
+  çıktının aynı görünmesi için yazı tipi oranları ölçülerek ayarlanmıştır.
+- **Donanım kodlama:** Açılışta her GPU kodlayıcı gerçek bir deneme kodlamasıyla test edilir;
+  çalışmayanlar sunulmaz.
+- **Hazır ayarlar ve tercihler** kullanıcı veri klasöründeki `config.json`'da tutulur.
+- **Fotoğraf:** 16-bit kaynak desteği, ICC profili koruması (ör. Display P3), EXIF yönlendirmesi.
+  Biçim değişmez ve düzenleme yapılmazsa dosya birebir kopyalanır.
+- **GIF:** FFmpeg'in palet tabanlı kodlayıcısı; HDR kaynaklar ton eşlemeyle SDR'ye aktarılır.
 
-## Gereksinimler
+### Gereksinimler (kaynaktan çalıştırma)
 
 Kurulum paketini kullanan için yalnızca Windows 10/11 yeterli: FFmpeg paketin içindedir.
 
@@ -58,7 +118,7 @@ bin/ffprobe.exe
 
 Alternatif olarak `ODAK_FFMPEG` ortam değişkeniyle ffmpeg.exe yolunu gösterebilirsin.
 
-## Kurulum ve çalıştırma
+### Kurulum ve çalıştırma
 
 ```powershell
 npm install
@@ -71,7 +131,7 @@ Geliştirme sırasında pencereyi yenileyerek çalışmak için:
 npm run dev
 ```
 
-## Kurulum paketi oluşturma
+### Kurulum paketi oluşturma
 
 ```powershell
 npm run dist
@@ -97,7 +157,7 @@ Notlar:
 - Kurulum dosyası imzasız olduğu için Windows SmartScreen ilk açılışta uyarı gösterebilir.
 - `nonfree` bileşen içeren FFmpeg derlemeleri yeniden dağıtılamaz; hazırlama betiği bunları reddeder.
 
-## Güncellemeler ve sürüm yayınlama
+### Güncellemeler ve sürüm yayınlama
 
 Kurulu uygulama açılıştan kısa süre sonra GitHub Releases'ta yeni sürüm olup olmadığına bakar.
 Varsa arka planda indirir (yalnızca değişen bloklar; FFmpeg gibi değişmeyen kısımlar yeniden
@@ -117,7 +177,7 @@ Bu komut testleri çalıştırır, kurulum dosyasını derler, `latest.yml`'nin 
 olduğunu doğrular ve kurulum dosyası + `.blockmap` + `latest.yml` ile GitHub'da yeni bir sürüm
 (release) oluşturur. Kurulu uygulamalar bir sonraki açılışta güncellemeyi bulur.
 
-## Testler
+### Testler
 
 Electron veya FFmpeg başlatmadan çalışan otomatik testler:
 
@@ -142,7 +202,7 @@ Bu komut şunları doğrular:
 - Video oynatıcı: kare adımı, kesim sonundan oynatma, giriş/çıkış noktaları.
 - Çeviri kapsamı: arayüzdeki her Türkçe metnin İngilizce karşılığı.
 
-## Kalite notları
+### Kalite notları
 
 - **Kopya modunda kesim** anahtar kareye hizalanır; başlangıç/bitiş genelde 1–2 sn (bazen
   daha fazla) kayabilir. Bu, görüntünün yeniden kodlanmaması için bilinçli bir tercihtir.
@@ -169,7 +229,7 @@ Bu komut şunları doğrular:
 - **HEIC/HEIF desteklenmez:** Sharp'ın Windows paketinde HEVC kod çözücü bulunmadığı için
   bu dosyalar açılamaz; dosya seçicide de önerilmez.
 
-## Kısayollar
+### Kısayollar
 
 | Tuş | İşlev |
 | --- | --- |
@@ -182,7 +242,7 @@ Bu komut şunları doğrular:
 | `Esc` | Kırpmayı iptal et / GIF önizlemesini kapat / toplu işlemi durdur |
 | `F1` | Yardım |
 
-## Proje yapısı
+### Proje yapısı
 
 ```
 electron/   Ana süreç: IPC, medya sunucusu, FFmpeg ve Sharp işlemleri
@@ -192,7 +252,7 @@ scripts/    Paketleme yardımcıları (FFmpeg hazırlama)
 test/       Electron/FFmpeg gerektirmeyen otomatik testler
 ```
 
-## Çeviri
+### Çeviri
 
 Arayüz Türkçe yazılır ve [src/i18n.js](src/i18n.js) Türkçe metni anahtar olarak kullanarak
 İngilizceye çevirir. Yeni bir metin eklediğinde sözlüğe `'Türkçe': 'English'` satırını, sayı veya
