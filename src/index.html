@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://127.0.0.1:*; media-src http://127.0.0.1:* blob:; connect-src http://127.0.0.1:*; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Odak Studio</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-video" viewBox="0 0 24 24"><path d="M4 6.5h10.5A2.5 2.5 0 0 1 17 9v6a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 15V9A2.5 2.5 0 0 1 4 6.5Z"/><path d="m17 10 3.6-2.2c.6-.4 1.4.1 1.4.9v6.6c0 .8-.8 1.3-1.4.9L17 14"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.7"/><path d="m4 17 5.1-4.6a1.6 1.6 0 0 1 2.1 0l2.2 2 2-1.8a1.6 1.6 0 0 1 2.1 0L21 16"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></symbol>
+    <symbol id="i-gif" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M9.8 10.2a2.3 2.3 0 1 0 .2 3.6h1.4v-2H9.6"/><path d="M14.2 10v4.2M17.4 10v4.2M17.4 12.1h2"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v2.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.7v12.6c0 .9 1 1.4 1.7.9l9.2-6.3a1.1 1.1 0 0 0 0-1.8L9.7 4.8C9 4.3 8 4.8 8 5.7Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.6" height="14" rx="1.1" fill="currentColor" stroke="none"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M6 5v14"/><path d="M18 6.4v11.2c0 .8-.9 1.3-1.6.8l-7.5-5.6a1 1 0 0 1 0-1.6l7.5-5.6c.7-.5 1.6 0 1.6.8Z"/></symbol>
+    <symbol id="i-forward" viewBox="0 0 24 24"><path d="M18 5v14"/><path d="M6 6.4v11.2c0 .8.9 1.3 1.6.8l7.5-5.6a1 1 0 0 0 0-1.6L7.6 5.6C6.9 5.1 6 5.6 6 6.4Z"/></symbol>
+    <symbol id="i-rotate-left" viewBox="0 0 24 24"><path d="M4 5v5h5"/><path d="M4.6 14a8 8 0 1 0 .9-6.9L4 10"/></symbol>
+    <symbol id="i-rotate-right" viewBox="0 0 24 24"><path d="M20 5v5h-5"/><path d="M19.4 14a8 8 0 1 1-.9-6.9L20 10"/></symbol>
+    <symbol id="i-flip-h" viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2.5 3"/><path d="M9 6.5 3 12l6 5.5Z"/><path d="m15 6.5 6 5.5-6 5.5Z"/></symbol>
+    <symbol id="i-flip-v" viewBox="0 0 24 24"><path d="M3 12h18" stroke-dasharray="2.5 3"/><path d="M6.5 9 12 3l5.5 6Z"/><path d="m6.5 15 5.5 6 5.5-6Z"/></symbol>
+    <symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2.5V16a2 2 0 0 0 2 2h13.5"/><path d="M2.5 6H16a2 2 0 0 1 2 2v13.5"/></symbol>
+    <symbol id="i-resize" viewBox="0 0 24 24"><path d="M4 15v5h5"/><path d="M20 9V4h-5"/><path d="m4 20 6-6"/><path d="m20 4-6 6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="2.2"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="2.2"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5v5h3.2l4.3 3.6V5.9L7.2 9.5H4Z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M17.8 6.2a8 8 0 0 1 0 11.6"/></symbol>
+    <symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9.5v5h3.2l4.3 3.6V5.9L7.2 9.5H4Z"/><path d="m15.5 9.5 5 5m0-5-5 5"/></symbol>
+    <symbol id="i-frame" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v14M16 5v14M3 10h5m8 0h5M3 14h5m8 0h5"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h4l2 2.5h7A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5Z"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M19 14v4.5a2.5 2.5 0 0 1-2.5 2.5h-10A2.5 2.5 0 0 1 4 18.5v-10A2.5 2.5 0 0 1 6.5 6H11"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8 7 4 11l4 4"/><path d="M4 11h9a6.5 6.5 0 0 1 6.5 6.5"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 9A8 8 0 1 1 4 14"/><path d="M4 4v5h5"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9.3a2.4 2.4 0 1 1 3.4 2.2c-.8.4-1.1.9-1.1 1.8"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5.2c0 4.4 2.9 7.7 7 9.8 4.1-2.1 7-5.4 7-9.8V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10m4 0h2M4 17h4m4 0h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-lock-shield" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"/><path d="M12 14v2.5"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m10 0h4M3 15h4m10 0h4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14m0 0 6-6m-6 6-6-6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13h.01M9.5 13h.01M13 13h.01M16.5 13h.01M8 16h8"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></symbol>
+    <symbol id="i-magnet" viewBox="0 0 24 24"><path d="M6 4v8a6 6 0 0 0 12 0V4"/><path d="M6 8h4M14 8h4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14m0 0-5-5m5 5-5 5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 18v.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V18"/></symbol>
+  </svg>
+
+  <div class="app" id="app">
+    <aside class="rail">
+      <div class="brand" aria-label="Odak Studio">
+        <span class="brand-mark">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="9" fill="#c9f75d"/>
+            <circle cx="16" cy="16" r="8.2" fill="none" stroke="#11140c" stroke-width="2.4"/>
+            <path d="m17.5 10.8 4.9 4.1a1.1 1.1 0 0 1 0 1.7l-4.9 4.1c-.8.7-2.1.1-2.1-1V11.8c0-1.1 1.3-1.7 2.1-1Z" fill="#11140c"/>
+          </svg>
+        </span>
+        <span class="brand-word">odak<em>.</em></span>
+      </div>
+
+      <nav class="modes" aria-label="Modlar">
+        <button class="mode active" data-mode="video" title="Video düzenle">
+          <svg class="icon"><use href="#i-video"></use></svg>
+          <span>Video</span>
+        </button>
+        <button class="mode" data-mode="photo" title="Fotoğraf düzenle">
+          <svg class="icon"><use href="#i-photo"></use></svg>
+          <span>Fotoğraf</span>
+        </button>
+        <button class="mode" data-mode="gif" title="GIF oluştur">
+          <svg class="icon"><use href="#i-gif"></use></svg>
+          <span>GIF</span>
+        </button>
+        <button class="mode" data-mode="batch" title="Toplu işlem kuyruğu">
+          <svg class="icon"><use href="#i-layers"></use></svg>
+          <span>Toplu</span>
+        </button>
+      </nav>
+
+      <div class="rail-foot">
+        <button class="engine" id="engineBadge" title="FFmpeg durumu">
+          <span class="engine-dot"></span>
+          <span class="engine-copy"><b>FFmpeg</b><small id="engineText">kontrol ediliyor</small></span>
+        </button>
+        <button class="rail-btn" id="helpBtn" title="Yardım ve kısayollar">
+          <svg class="icon"><use href="#i-help"></use></svg>
+          <span>Yardım</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumbs">
+          <span class="crumb-muted">Stüdyo</span>
+          <span class="crumb-sep">/</span>
+          <b id="modeLabel">Video</b>
+        </div>
+        <div class="top-actions">
+          <button class="btn primary" id="openBtn">
+            <svg class="icon"><use href="#i-upload"></use></svg>
+            <span>Dosya aç</span>
+            <kbd>Ctrl O</kbd>
+          </button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-main">
+            <div class="empty-art" aria-hidden="true">
+              <div class="orb"></div>
+              <div class="drop-stack">
+                <div class="stack-card stack-card--back"></div>
+                <div class="stack-card stack-card--mid"></div>
+                <div class="stack-card stack-card--front">
+                  <svg class="icon"><use href="#i-upload"></use></svg>
+                </div>
+              </div>
+            </div>
+            <div class="eyebrow"><span></span> Kalite burada başlar</div>
+            <h1 id="emptyTitle">Videoda <em>kaliteyi</em><br>koru.</h1>
+            <p id="emptyDescription">Kes, kırp, döndür; bit hızını ve çözünürlüğü sen kontrol et. Dosyan cihazından ayrılmaz.</p>
+            <div class="empty-actions">
+              <button class="btn accent" id="emptyOpenBtn">
+                <svg class="icon"><use href="#i-plus"></use></svg>
+                <span id="emptyOpenLabel">Video seç</span>
+              </button>
+              <span class="drop-hint">veya buraya sürükle &amp; bırak</span>
+            </div>
+            <div class="format-line" id="emptyFormats">MP4 · MOV · MKV · WEBM · M4V · AVI</div>
+          </div>
+
+          <div class="empty-side">
+            <div class="feature-card">
+              <span class="feature-icon"><svg class="icon"><use href="#i-magnet"></use></svg></span>
+              <div><b>Kayıpsız kesim</b><p>Kesim yeterliyse yeniden kodlama yok; bitler aynen kalır.</p></div>
+            </div>
+            <div class="feature-card">
+              <span class="feature-icon"><svg class="icon"><use href="#i-sliders"></use></svg></span>
+              <div><b>Kalite senin elinde</b><p>CRF 10–30 veya kaynak bit hızı. Gizli sıkıştırma yok.</p></div>
+            </div>
+            <div class="feature-card">
+              <span class="feature-icon"><svg class="icon"><use href="#i-lock-shield"></use></svg></span>
+              <div><b>Bulut yok</b><p>Hiçbir kare internete gitmez. İşlem tamamen yerel.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIDEO -->
+        <section class="editor-grid" id="videoEditor" hidden>
+          <div class="stage-panel">
+            <header class="stage-head">
+              <div class="file-info">
+                <span class="file-icon"><svg class="icon"><use href="#i-video"></use></svg></span>
+                <div class="file-copy">
+                  <h2 id="videoFileName">video.mp4</h2>
+                  <div class="meta-chips" id="videoMetaChips"></div>
+                </div>
+              </div>
+              <div class="head-actions">
+                <button class="icon-btn" id="videoReplaceBtn" title="Başka video aç">
+                  <svg class="icon"><use href="#i-upload"></use></svg>
+                </button>
+              </div>
+            </header>
+
+            <div class="stage" id="videoStage">
+              <div class="stage-grid"></div>
+              <div class="frame" id="videoFrame">
+                <video id="videoEl" playsinline preload="metadata"></video>
+                <img id="videoPoster" alt="" class="poster hidden" draggable="false">
+                <div class="video-fallback hidden" id="videoFallback">
+                  <svg class="icon"><use href="#i-alert"></use></svg>
+                  <div><b>Bu codec tarayıcıda önizlenemiyor</b><span id="videoFallbackText">Kesim ve dışa aktarma yine de çalışır.</span></div>
+                </div>
+                <div class="crop-overlay hidden" id="videoCropOverlay">
+                  <div class="crop-box" id="videoCropBox">
+                    <div class="crop-grid"></div>
+                    <span class="crop-handle nw" data-handle="nw"></span>
+                    <span class="crop-handle n" data-handle="n"></span>
+                    <span class="crop-handle ne" data-handle="ne"></span>
+                    <span class="crop-handle e" data-handle="e"></span>
+                    <span class="crop-handle se" data-handle="se"></span>
+                    <span class="crop-handle s" data-handle="s"></span>
+                    <span class="crop-handle sw" data-handle="sw"></span>
+                    <span class="crop-handle w" data-handle="w"></span>
+                    <span class="crop-size" id="videoCropSize"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="stage-badge" id="videoStageBadge">—</div>
+              <div class="stage-loading hidden" id="videoLoading"><span class="spinner"></span><span>Video hazırlanıyor</span></div>
+            </div>
+
+            <div class="crop-toolbar hidden" id="videoCropBar">
+              <div class="crop-readout"><span>KIRPMA</span><b id="videoCropDims">—</b></div>
+              <div class="ratio-pills" id="videoRatioPills">
+                <button data-ratio="free" class="active">Serbest</button>
+                <button data-ratio="1">1:1</button>
+                <button data-ratio="1.7778">16:9</button>
+                <button data-ratio="0.5625">9:16</button>
+                <button data-ratio="0.8">4:5</button>
+              </div>
+              <span class="grow"></span>
+              <button class="btn small ghost" id="videoCropCancel">İptal</button>
+              <button class="btn small accent" id="videoCropApply"><svg class="icon"><use href="#i-check"></use></svg>Uygula</button>
+            </div>
+
+            <div class="understage" id="videoTransportBar">
+              <div class="transport">
+                <button class="round-btn" id="videoPlayBtn" title="Oynat / durdur (Space)">
+                  <svg class="icon"><use href="#i-play"></use></svg>
+                </button>
+                <button class="round-btn ghost" id="videoPrevFrame" title="Önceki kare">
+                  <svg class="icon"><use href="#i-back"></use></svg>
+                </button>
+                <button class="round-btn ghost" id="videoNextFrame" title="Sonraki kare">
+                  <svg class="icon"><use href="#i-forward"></use></svg>
+                </button>
+                <div class="timecode"><span id="videoCurrentTime">00:00.00</span><span class="tc-sep">/</span><span id="videoTotalTime">00:00.00</span></div>
+                <span class="grow"></span>
+                <span class="speed-chip hidden" id="videoSpeedChip">1×</span>
+                <button class="text-btn" id="videoFrameBtn" title="Bu kareyi PNG olarak kaydet">
+                  <svg class="icon"><use href="#i-frame"></use></svg>
+                  Kare kaydet
+                </button>
+                <button class="round-btn ghost" id="videoMuteBtn" title="Sesi aç / kapat">
+                  <svg class="icon"><use href="#i-volume"></use></svg>
+                </button>
+              </div>
+
+              <div class="timeline" id="videoTimeline">
+                <div class="timeline-head">
+                  <span><svg class="icon"><use href="#i-film"></use></svg> Zaman çizelgesi</span>
+                  <b id="videoRangeLabel">00:00.00 — 00:00.00</b>
+                </div>
+                <div class="tl-track" id="videoTlTrack">
+                  <div class="tl-filmstrip" id="videoFilmstrip"></div>
+                  <div class="tl-shade left" id="videoShadeL"></div>
+                  <div class="tl-shade right" id="videoShadeR"></div>
+                  <div class="tl-selection" id="videoSelection">
+                    <span class="tl-handle in" id="videoHandleIn"><i></i></span>
+                    <span class="tl-handle out" id="videoHandleOut"><i></i></span>
+                  </div>
+                  <div class="tl-playhead" id="videoPlayhead"><span></span></div>
+                </div>
+                <div class="tl-scale"><span id="videoScaleStart">00:00</span><span id="videoScaleMid">00:00</span><span id="videoScaleEnd">00:00</span></div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="inspector">
+            <div class="inspector-tabs" role="tablist">
+              <button class="inspector-tab active" data-vtab="edit" role="tab">Düzenle</button>
+              <button class="inspector-tab" data-vtab="output" role="tab">Çıktı</button>
+            </div>
+
+            <div class="inspector-scroll">
+              <div data-vpane="edit">
+                <section class="group">
+                  <div class="group-head"><h3>Kesim</h3><button class="link-btn" id="videoResetTrim">Sıfırla</button></div>
+                  <div class="field-row">
+                    <label class="field"><span>Başlangıç <small>sn</small></span><input type="number" id="trimStartInput" min="0" step="0.01" inputmode="decimal"></label>
+                    <label class="field"><span>Bitiş <small>sn</small></span><input type="number" id="trimEndInput" min="0" step="0.01" inputmode="decimal"></label>
+                  </div>
+                  <p class="hint" id="trimHint">Kayıpsız modda kesim en yakın anahtar kareye hizalanır.</p>
+                  <button class="btn ghost compact block segment-add" id="videoAddSegment" title="Seçili aralığı bölüm listesine ekle (B)"><svg class="icon"><use href="#i-plus"></use></svg>Seçimi bölüm olarak ekle</button>
+                  <div class="segment-list" id="videoSegmentList" hidden></div>
+                  <p class="hint" id="videoSegmentHint" hidden>Dışa aktarmada yalnızca listedeki bölümler sırayla birleştirilir. Seçim, yeni bölüm eklemek içindir.</p>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Kadraj</h3><button class="link-btn" id="videoFrameReset">Sıfırla</button></div>
+                  <div class="tool-grid">
+                    <button class="tool-btn" id="videoRotateLeft" title="90° sola döndür"><svg class="icon"><use href="#i-rotate-left"></use></svg><span>Sol</span></button>
+                    <button class="tool-btn" id="videoRotateRight" title="90° sağa döndür"><svg class="icon"><use href="#i-rotate-right"></use></svg><span>Sağ</span></button>
+                    <button class="tool-btn" id="videoFlipH" title="Yatay çevir"><svg class="icon"><use href="#i-flip-h"></use></svg><span>Yatay</span></button>
+                    <button class="tool-btn" id="videoFlipV" title="Dikey çevir"><svg class="icon"><use href="#i-flip-v"></use></svg><span>Dikey</span></button>
+                  </div>
+                  <div class="crop-row">
+                    <button class="wide-btn" id="videoCropBtn"><svg class="icon"><use href="#i-crop"></use></svg>Kırp</button>
+                    <span class="crop-state" id="videoCropState">Tam kare</span>
+                  </div>
+                  <div class="field-row with-icon">
+                    <label class="field"><span>Genişlik <small>px</small></span><input type="number" id="videoResizeW" min="2" step="2" inputmode="numeric"></label>
+                    <button class="lock-btn active" id="videoResizeLock" title="Oranı koru"><svg class="icon"><use href="#i-lock"></use></svg></button>
+                    <label class="field"><span>Yükseklik <small>px</small></span><input type="number" id="videoResizeH" min="2" step="2" inputmode="numeric"></label>
+                  </div>
+                  <div class="chip-row" id="videoScaleChips">
+                    <button data-scale="1" class="active">Orijinal</button>
+                    <button data-scale="0.75">%75</button>
+                    <button data-scale="0.5">%50</button>
+                    <button data-scale="0.25">%25</button>
+                  </div>
+                  <div class="divider"></div>
+                  <label class="field inline-field"><span>Hız</span>
+                    <select id="videoSpeed">
+                      <option value="0.5">0.5×</option>
+                      <option value="0.75">0.75×</option>
+                      <option value="1" selected>1×</option>
+                      <option value="1.25">1.25×</option>
+                      <option value="1.5">1.5×</option>
+                      <option value="2">2×</option>
+                    </select>
+                  </label>
+                  <p class="hint" id="speedHint">Hız değişince video yeniden kodlanır.</p>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Ses</h3></div>
+                  <div class="switch-row">
+                    <div><b>Videoyu sessizleştir</b><span class="sub">Ses akışı tamamen çıkarılır.</span></div>
+                    <button class="switch" id="videoMuteSwitch" role="switch" aria-checked="false"><i></i></button>
+                  </div>
+                  <label class="field"><span>Ses çıktısı</span>
+                    <select id="videoAudioMode">
+                      <option value="original">Orijinal (kopyala)</option>
+                      <option value="aac">AAC 320 kbps</option>
+                      <option value="none">Sessiz</option>
+                    </select>
+                  </label>
+                  <p class="hint" id="audioHint">Ses, kapsayıcı destekliyorsa yeniden kodlanmadan kopyalanır.</p>
+                </section>
+
+                <section class="group" id="videoTextSection"></section>
+
+                <section class="group" id="videoSubtitleSection" hidden>
+                  <div class="group-head"><h3>Altyazı</h3><span class="group-note" id="videoSubtitleNote">—</span></div>
+                  <label class="field"><span>Videoya yak</span>
+                    <select id="videoBurnSubtitle"></select>
+                  </label>
+                  <p class="hint" id="videoSubtitleHint">Yakılan altyazı görüntünün parçası olur; her oynatıcıda görünür ama kapatılamaz.</p>
+                </section>
+              </div>
+
+              <div data-vpane="output" hidden>
+                <section class="group">
+                  <div class="group-head"><h3>Hazır ayar</h3><button class="link-btn" id="videoPresetDelete" hidden>Sil</button></div>
+                  <div class="preset-row">
+                    <label class="field"><span>Ayar</span><select id="videoPresetSelect"></select></label>
+                    <button class="btn small ghost" id="videoPresetSave" title="Geçerli codec ve kalite ayarlarını kaydet">Kaydet</button>
+                  </div>
+                  <div class="preset-row" id="videoPresetSaveRow" hidden>
+                    <label class="field"><span>Yeni ayarın adı</span><input type="text" id="videoPresetName" maxlength="40" spellcheck="false"></label>
+                    <button class="btn small accent" id="videoPresetConfirm">Kaydet</button>
+                    <button class="btn small ghost" id="videoPresetCancel">İptal</button>
+                  </div>
+                  <p class="hint" id="videoPresetHint">Codec, kalite ve boyut sınırı tek seçimle ayarlanır. Son kullandığın ayarlar hatırlanır.</p>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Codec</h3><span class="group-note" id="codecNote">MP4</span></div>
+                  <div class="codec-grid" id="videoCodecGrid">
+                    <button data-codec="h264" class="active"><b>H.264</b><small>MP4 · uyumlu</small></button>
+                    <button data-codec="h265"><b>H.265</b><small>MP4 · küçük</small></button>
+                    <button data-codec="vp9"><b>VP9</b><small>WEBM · açık</small></button>
+                    <button data-codec="prores"><b>ProRes</b><small>MOV · arşiv</small></button>
+                  </div>
+                  <p class="hint" id="codecHint">Düzenleme yoksa H.264 kaynağı olduğu gibi kopyalanır.</p>
+                  <div id="videoEncoderRow" hidden>
+                    <span class="field-label">Kodlayıcı</span>
+                    <div class="segmented" id="videoEncoderMode">
+                      <button data-encoder="cpu" class="active">İşlemci</button>
+                      <button data-encoder="gpu">Ekran kartı</button>
+                    </div>
+                    <p class="hint" id="videoEncoderHint">İşlemci en iyi sıkıştırmayı verir; ekran kartı çok daha hızlıdır.</p>
+                  </div>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Kalite</h3></div>
+                  <div class="segmented" id="videoQualityMode">
+                    <button data-quality="copy" class="active">Kayıpsız</button>
+                    <button data-quality="crf">CRF</button>
+                    <button data-quality="bitrate">Bit hızı</button>
+                    <button data-quality="size">Boyut</button>
+                  </div>
+
+                  <div class="quality-pane" id="copyQualityPane">
+                    <div class="note-box">
+                      <svg class="icon"><use href="#i-shield"></use></svg>
+                      <div><b>Yeniden kodlama yok</b><p>Video ve ses akışları olduğu gibi kopyalanır. Çözünürlük ve bit hızı birebir korunur.</p></div>
+                    </div>
+                    <p class="hint" id="copyModeHint">Kesim dışında bir işlem yaparsan bu mod otomatik olarak CRF'ye geçer.</p>
+                  </div>
+
+                  <div class="quality-pane" id="crfQualityPane" hidden>
+                    <div class="range-head"><span>Kalite</span><b id="crfValue">16</b></div>
+                    <input class="range" type="range" id="crfRange" min="10" max="30" step="1" value="16">
+                    <div class="range-scale"><span>Daha yüksek kalite</span><span>Daha küçük dosya</span></div>
+                    <label class="field"><span>İşlem hızı</span>
+                      <select id="videoPreset">
+                        <option value="fast">Hızlı</option>
+                        <option value="medium" selected>Dengeli</option>
+                        <option value="slow">Yüksek kalite</option>
+                      </select>
+                    </label>
+                    <p class="hint">CRF 16 görsel olarak kayıpsıza çok yakındır; dosya boyutu kaynağa göre değişebilir.</p>
+                  </div>
+
+                  <div class="quality-pane" id="bitrateQualityPane" hidden>
+                    <label class="field"><span>Video bit hızı <small>kbps</small></span><input type="number" id="bitrateInput" min="100" step="100" inputmode="numeric"></label>
+                    <p class="hint" id="bitrateHint">Kaynak bit hızı okunamadı.</p>
+                    <p class="warn hidden" id="bitrateWarn">Hedef, kaynak bit hızının altında; kalite düşebilir.</p>
+                  </div>
+
+                  <div class="quality-pane" id="sizeQualityPane" hidden>
+                    <label class="field"><span>Hedef dosya boyutu <small>MB</small></span><input type="number" id="sizeTargetInput" min="0.1" step="0.5" inputmode="decimal"></label>
+                    <div class="chip-row" id="sizeChips">
+                      <button data-size="10">10 MB</button>
+                      <button data-size="16">16 MB</button>
+                      <button data-size="25">25 MB</button>
+                      <button data-size="50">50 MB</button>
+                    </div>
+                    <p class="hint" id="sizeHint">Video iki geçişte kodlanır; çıktı hedefin altında kalır.</p>
+                    <p class="warn hidden" id="sizeWarn">Hedef bu süre için çok küçük.</p>
+                  </div>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Kayıt</h3></div>
+                  <label class="field"><span>Dosya adı</span>
+                    <div class="input-suffix"><input type="text" id="videoBaseName" maxlength="120" spellcheck="false"><span id="videoExt">.mp4</span></div>
+                  </label>
+                  <span class="field-label">Klasör</span>
+                  <button class="folder-btn" id="videoFolderBtn">
+                    <svg class="icon"><use href="#i-folder"></use></svg>
+                    <span id="videoFolderPath">Klasör seç</span>
+                    <svg class="icon chevron"><use href="#i-chevron"></use></svg>
+                  </button>
+                  <p class="hint">Dosya adı çakışırsa otomatik olarak numaralandırılır.</p>
+                </section>
+              </div>
+            </div>
+
+            <div class="export-dock">
+              <div class="export-summary">
+                <span class="summary-label">ÇIKTI</span>
+                <b id="videoSummary">Hazır değil</b>
+                <small id="videoOutNote">Dosya seçin</small>
+              </div>
+              <button class="btn accent export-btn" id="videoExportBtn" disabled>
+                <svg class="icon"><use href="#i-download"></use></svg>
+                <span>Dışa aktar</span>
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <!-- PHOTO -->
+        <section class="editor-grid" id="photoEditor" hidden>
+          <div class="stage-panel">
+            <header class="stage-head">
+              <div class="file-info">
+                <span class="file-icon"><svg class="icon"><use href="#i-photo"></use></svg></span>
+                <div class="file-copy">
+                  <h2 id="photoFileName">fotoğraf.jpg</h2>
+                  <div class="meta-chips" id="photoMetaChips"></div>
+                </div>
+              </div>
+              <div class="head-actions">
+                <button class="icon-btn" id="photoReplaceBtn" title="Başka fotoğraf aç">
+                  <svg class="icon"><use href="#i-upload"></use></svg>
+                </button>
+              </div>
+            </header>
+
+            <div class="stage photo-stage" id="photoStage">
+              <div class="stage-grid"></div>
+              <div class="frame photo-frame" id="photoFrame">
+                <img id="photoImg" alt="Düzenlenen fotoğraf" draggable="false">
+                <div class="crop-overlay hidden" id="photoCropOverlay">
+                  <div class="crop-box" id="photoCropBox">
+                    <div class="crop-grid"></div>
+                    <span class="crop-handle nw" data-handle="nw"></span>
+                    <span class="crop-handle n" data-handle="n"></span>
+                    <span class="crop-handle ne" data-handle="ne"></span>
+                    <span class="crop-handle e" data-handle="e"></span>
+                    <span class="crop-handle se" data-handle="se"></span>
+                    <span class="crop-handle s" data-handle="s"></span>
+                    <span class="crop-handle sw" data-handle="sw"></span>
+                    <span class="crop-handle w" data-handle="w"></span>
+                    <span class="crop-size" id="photoCropSize"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="stage-badge" id="photoStageBadge">—</div>
+              <div class="stage-loading hidden" id="photoLoading"><span class="spinner"></span><span>Görsel hazırlanıyor</span></div>
+            </div>
+
+            <div class="crop-toolbar hidden" id="photoCropBar">
+              <div class="crop-readout"><span>KIRPMA</span><b id="photoCropDims">—</b></div>
+              <div class="ratio-pills" id="photoRatioPills">
+                <button data-ratio="free" class="active">Serbest</button>
+                <button data-ratio="1">1:1</button>
+                <button data-ratio="1.7778">16:9</button>
+                <button data-ratio="0.5625">9:16</button>
+                <button data-ratio="0.8">4:5</button>
+              </div>
+              <span class="grow"></span>
+              <button class="btn small ghost" id="photoCropCancel">İptal</button>
+              <button class="btn small accent" id="photoCropApply"><svg class="icon"><use href="#i-check"></use></svg>Uygula</button>
+            </div>
+
+            <div class="photo-foot">
+              <div class="photo-hint"><svg class="icon"><use href="#i-info"></use></svg><span>Döndürme ve kırpma pikselleri yeniden işler; çıktıda PNG veya WebP seçerek kayıpsız kalırsın.</span></div>
+              <div class="photo-history">
+                <button class="btn small ghost" id="photoUndo" title="Geri al (Ctrl Z)"><svg class="icon"><use href="#i-undo"></use></svg>Geri al</button>
+                <button class="btn small ghost" id="photoReset" title="Tüm düzenlemeleri sıfırla"><svg class="icon"><use href="#i-reset"></use></svg>Sıfırla</button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="inspector">
+            <div class="inspector-scroll">
+              <section class="group">
+                <div class="group-head"><h3>Dönüştür</h3><span class="group-note" id="photoHistoryCount">0 işlem</span></div>
+                <div class="tool-grid">
+                  <button class="tool-btn" id="photoRotateLeft"><svg class="icon"><use href="#i-rotate-left"></use></svg><span>Sol</span></button>
+                  <button class="tool-btn" id="photoRotateRight"><svg class="icon"><use href="#i-rotate-right"></use></svg><span>Sağ</span></button>
+                  <button class="tool-btn" id="photoFlipH"><svg class="icon"><use href="#i-flip-h"></use></svg><span>Yatay</span></button>
+                  <button class="tool-btn" id="photoFlipV"><svg class="icon"><use href="#i-flip-v"></use></svg><span>Dikey</span></button>
+                </div>
+                <div class="crop-row">
+                  <button class="wide-btn" id="photoCropBtn"><svg class="icon"><use href="#i-crop"></use></svg>Kırp</button>
+                  <span class="crop-state" id="photoCropState">Tam kare</span>
+                </div>
+              </section>
+
+              <section class="group">
+                <div class="group-head"><h3>Boyut</h3></div>
+                <div class="field-row with-icon">
+                  <label class="field"><span>Genişlik <small>px</small></span><input type="number" id="photoResizeW" min="1" step="1" inputmode="numeric"></label>
+                  <button class="lock-btn active" id="photoResizeLock" title="Oranı koru"><svg class="icon"><use href="#i-lock"></use></svg></button>
+                  <label class="field"><span>Yükseklik <small>px</small></span><input type="number" id="photoResizeH" min="1" step="1" inputmode="numeric"></label>
+                </div>
+                <div class="chip-row" id="photoScaleChips">
+                  <button data-scale="1" class="active">Orijinal</button>
+                  <button data-scale="0.75">%75</button>
+                  <button data-scale="0.5">%50</button>
+                  <button data-scale="0.25">%25</button>
+                </div>
+                <button class="btn ghost compact block" id="photoResizeApply" disabled>Boyutu uygula</button>
+              </section>
+
+              <section class="group" id="photoTextSection"></section>
+
+              <section class="group">
+                <div class="group-head"><h3>Çıktı</h3></div>
+                <label class="field"><span>Format</span>
+                  <select id="photoFormat">
+                    <option value="original">Orijinal format</option>
+                    <option value="jpeg">JPEG · maksimum</option>
+                    <option value="png">PNG · kayıpsız</option>
+                    <option value="webp">WebP · kayıpsız</option>
+                    <option value="avif">AVIF · küçük dosya</option>
+                    <option value="tiff">TIFF · kayıpsız</option>
+                  </select>
+                </label>
+                <label class="field" id="photoQualityField"><span>Kalite</span>
+                  <select id="photoQuality">
+                    <option value="max">Maksimum</option>
+                    <option value="high">Yüksek</option>
+                    <option value="balanced">Dengeli</option>
+                  </select>
+                </label>
+                <div class="switch-row compact">
+                  <div><b>EXIF &amp; renk profilini koru</b><span class="sub">Oryantasyon otomatik düzeltilir.</span></div>
+                  <button class="switch on" id="photoKeepMeta" role="switch" aria-checked="true"><i></i></button>
+                </div>
+                <label class="field"><span>Dosya adı</span>
+                  <div class="input-suffix"><input type="text" id="photoBaseName" maxlength="120" spellcheck="false"><span id="photoExt">.jpg</span></div>
+                </label>
+                <span class="field-label">Klasör</span>
+                <button class="folder-btn" id="photoFolderBtn">
+                  <svg class="icon"><use href="#i-folder"></use></svg>
+                  <span id="photoFolderPath">Klasör seç</span>
+                  <svg class="icon chevron"><use href="#i-chevron"></use></svg>
+                </button>
+              </section>
+            </div>
+
+            <div class="export-dock">
+              <div class="export-summary">
+                <span class="summary-label">ÇIKTI</span>
+                <b id="photoSummary">Hazır değil</b>
+                <small id="photoOutNote">Dosya seçin</small>
+              </div>
+              <button class="btn accent export-btn" id="photoExportBtn" disabled>
+                <svg class="icon"><use href="#i-download"></use></svg>
+                <span>Dışa aktar</span>
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <!-- GIF -->
+        <section class="editor-grid gif-editor" id="gifEditor" hidden>
+          <div class="stage-panel">
+            <header class="stage-head">
+              <div class="file-info">
+                <span class="file-icon"><svg class="icon"><use href="#i-gif"></use></svg></span>
+                <div class="file-copy">
+                  <h2 id="gifFileName">GIF Stüdyo</h2>
+                  <div class="meta-chips" id="gifMetaChips"></div>
+                </div>
+              </div>
+              <div class="head-actions">
+                <button class="icon-btn" id="gifPreviewBtn" title="GIF önizle">
+                  <svg class="icon"><use href="#i-play"></use></svg>
+                </button>
+                <button class="icon-btn" id="gifAddBtn" title="Video veya fotoğraf ekle">
+                  <svg class="icon"><use href="#i-plus"></use></svg>
+                </button>
+              </div>
+            </header>
+
+            <div class="stage gif-stage" id="gifStage">
+              <div class="stage-grid"></div>
+              <div class="frame gif-frame" id="gifFrame">
+                <video id="gifVideo" playsinline preload="metadata" muted></video>
+                <img id="gifPhoto" alt="Seçili klip" draggable="false" hidden>
+                <img id="gifPreviewImg" alt="GIF önizlemesi" draggable="false" hidden>
+              </div>
+              <div class="stage-badge" id="gifStageBadge">—</div>
+              <div class="gif-preview-tag hidden" id="gifPreviewTag">GIF önizlemesi · 320 px</div>
+              <div class="stage-loading hidden" id="gifLoading">
+                <span class="spinner"></span><span id="gifLoadingText">Medya hazırlanıyor</span>
+              </div>
+            </div>
+
+            <div class="gif-sequence-wrap">
+              <div class="gif-sequence-head">
+                <span><svg class="icon"><use href="#i-film"></use></svg> Klipler <b id="gifSequenceCount">0</b></span>
+                <span class="gif-sequence-total" id="gifSequenceTotal">—</span>
+              </div>
+              <div class="gif-sequence" id="gifSequence" aria-label="GIF klip sırası"></div>
+            </div>
+
+            <div class="gif-foot">
+              <div class="gif-transport">
+                <button class="round-btn" id="gifPlayBtn" title="Seçili videoyu oynat">
+                  <svg class="icon"><use href="#i-play"></use></svg>
+                </button>
+                <button class="round-btn ghost" id="gifPrevBtn" title="Önceki klip">
+                  <svg class="icon"><use href="#i-back"></use></svg>
+                </button>
+                <button class="round-btn ghost" id="gifNextBtn" title="Sonraki klip">
+                  <svg class="icon"><use href="#i-forward"></use></svg>
+                </button>
+                <div class="timecode">
+                  <span id="gifClipTime">00:00.00</span><span class="tc-sep">/</span><span id="gifClipDuration">00:00.00</span>
+                </div>
+              </div>
+              <div class="gif-foot-hint"><svg class="icon"><use href="#i-info"></use></svg><span>Seçili klibi düzenle; sırayı alttan değiştir.</span></div>
+              <button class="btn small ghost" id="gifRemoveBtn"><svg class="icon"><use href="#i-trash"></use></svg>Kaldır</button>
+            </div>
+          </div>
+
+          <aside class="inspector gif-inspector">
+            <div class="inspector-tabs" role="tablist">
+              <button class="inspector-tab active" data-gtab="clip" role="tab">Klip</button>
+              <button class="inspector-tab" data-gtab="gif" role="tab">GIF</button>
+            </div>
+
+            <div class="inspector-scroll" id="gifInspectorScroll">
+              <div data-gpane="clip">
+                <div class="gif-clip-head">
+                  <div>
+                    <span class="gif-clip-type" id="gifClipType">KLİP</span>
+                    <b id="gifClipName">—</b>
+                  </div>
+                  <div class="gif-order-actions">
+                    <button class="icon-btn small" id="gifMoveLeft" title="Bir öne al"><svg class="icon"><use href="#i-chevron"></use></svg></button>
+                    <button class="icon-btn small" id="gifMoveRight" title="Bir sonra al"><svg class="icon"><use href="#i-chevron"></use></svg></button>
+                  </div>
+                </div>
+                <p class="gif-clip-empty" id="gifClipEmpty">Sıradan bir klip seç.</p>
+
+                <div id="gifClipSettings">
+                  <section class="group">
+                    <div class="group-head"><h3>Zaman</h3><span class="group-note" id="gifClipDurationNote">—</span></div>
+                    <div class="field-row" id="gifVideoTrimRow">
+                      <label class="field"><span>Başlangıç <small>sn</small></span><input type="number" id="gifTrimStart" min="0" step="0.01" inputmode="decimal"></label>
+                      <label class="field"><span>Bitiş <small>sn</small></span><input type="number" id="gifTrimEnd" min="0" step="0.01" inputmode="decimal"></label>
+                    </div>
+                    <label class="field" id="gifPhotoDurationField">
+                      <span>Görünme süresi <small>sn</small></span><input type="number" id="gifPhotoDuration" min="0.1" max="30" step="0.1" inputmode="decimal">
+                    </label>
+                    <label class="field inline-field" id="gifSpeedField">
+                      <span>Hız</span>
+                      <select id="gifSpeed">
+                        <option value="0.5">0.5×</option>
+                        <option value="0.75">0.75×</option>
+                        <option value="1" selected>1×</option>
+                        <option value="1.25">1.25×</option>
+                        <option value="1.5">1.5×</option>
+                        <option value="2">2×</option>
+                        <option value="4">4×</option>
+                      </select>
+                    </label>
+                    <p class="hint" id="gifClipHint">Kesim ve hız yalnızca seçili videoyu etkiler.</p>
+                  </section>
+
+                  <section class="group">
+                    <div class="group-head"><h3>Kırpma</h3><span class="group-note" id="gifCropNote">Otomatik</span></div>
+                    <div class="chip-row gif-ratio-pills" id="gifCropPills">
+                      <button data-crop="auto" class="active">Oto</button>
+                      <button data-crop="1:1">1:1</button>
+                      <button data-crop="16:9">16:9</button>
+                      <button data-crop="9:16">9:16</button>
+                      <button data-crop="4:5">4:5</button>
+                      <button data-crop="4:3">4:3</button>
+                    </div>
+                    <p class="hint">Kırpma ortadan yapılır. Farklı oranlar siyah zeminle tamamlanır.</p>
+                  </section>
+
+                  <section class="group">
+                    <div class="group-head"><h3>Sıra</h3><span class="group-note" id="gifItemPosition">—</span></div>
+                    <div class="gif-item-actions">
+                      <button class="btn small ghost" id="gifAddMoreBtn"><svg class="icon"><use href="#i-plus"></use></svg>Medya ekle</button>
+                      <button class="btn small ghost danger" id="gifRemoveClipBtn"><svg class="icon"><use href="#i-trash"></use></svg>Kaldır</button>
+                    </div>
+                  </section>
+                </div>
+              </div>
+
+              <div data-gpane="gif" hidden>
+                <section class="group">
+                  <div class="group-head"><h3>Tuval</h3><span class="group-note" id="gifCanvasNote">—</span></div>
+                  <label class="field"><span>Oran</span>
+                    <select id="gifCanvasRatio">
+                      <option value="auto" selected>İlk klibe göre</option>
+                      <option value="1:1">1:1 · kare</option>
+                      <option value="4:3">4:3</option>
+                      <option value="16:9">16:9</option>
+                      <option value="9:16">9:16 · dikey</option>
+                      <option value="4:5">4:5</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Genişlik</span>
+                    <select id="gifWidth">
+                      <option value="320">320 px · küçük</option>
+                      <option value="480" selected>480 px · dengeli</option>
+                      <option value="640">640 px · net</option>
+                      <option value="800">800 px · büyük</option>
+                    </select>
+                  </label>
+                  <p class="hint" id="gifCanvasHint">Tüm klipler aynı tuvale sığdırılır. Genişlik arttıkça GIF dosyası büyür.</p>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Animasyon</h3></div>
+                  <label class="field"><span>FPS</span>
+                    <select id="gifFps">
+                      <option value="8">8 fps · en küçük</option>
+                      <option value="10">10 fps</option>
+                      <option value="12" selected>12 fps · akıcı</option>
+                      <option value="15">15 fps</option>
+                      <option value="20">20 fps</option>
+                      <option value="24">24 fps</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Döngü</span>
+                    <select id="gifLoop">
+                      <option value="0" selected>Sonsuz</option>
+                      <option value="1">1 döngü</option>
+                      <option value="3">3 döngü</option>
+                      <option value="5">5 döngü</option>
+                    </select>
+                  </label>
+                  <p class="hint">GIF ses içermez. 256 renk sınırı nedeniyle renk geçişleri sınırlıdır.</p>
+                </section>
+
+                <section class="group" id="gifTextSection"></section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Kayıt</h3></div>
+                  <label class="field"><span>Dosya adı</span>
+                    <div class="input-suffix"><input type="text" id="gifBaseName" maxlength="120" spellcheck="false"><span>.gif</span></div>
+                  </label>
+                  <span class="field-label">Klasör</span>
+                  <button class="folder-btn" id="gifFolderBtn">
+                    <svg class="icon"><use href="#i-folder"></use></svg>
+                    <span id="gifFolderPath">Klasör seç</span>
+                    <svg class="icon chevron"><use href="#i-chevron"></use></svg>
+                  </button>
+                  <p class="hint">Dosya adı çakışırsa otomatik olarak numaralandırılır.</p>
+                </section>
+              </div>
+            </div>
+
+            <div class="export-dock">
+              <div class="export-summary">
+                <span class="summary-label">ÇIKTI</span>
+                <b id="gifSummary">Hazır değil</b>
+                <small id="gifOutNote">Medya ekleyin</small>
+              </div>
+              <button class="btn accent export-btn" id="gifExportBtn" disabled>
+                <svg class="icon"><use href="#i-download"></use></svg>
+                <span>GIF oluştur</span>
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <!-- BATCH -->
+        <section class="editor-grid batch-editor" id="batchEditor" hidden>
+          <div class="stage-panel batch-stage">
+            <header class="stage-head batch-head">
+              <div class="file-info">
+                <span class="file-icon batch-file-icon"><svg class="icon"><use href="#i-layers"></use></svg></span>
+                <div class="file-copy">
+                  <h2>Toplu işlem kuyruğu</h2>
+                  <div class="meta-chips" id="batchMetaChips"></div>
+                </div>
+              </div>
+              <div class="head-actions">
+                <button class="btn small ghost" id="batchAddBtn" title="Kuyruğa dosya ekle">
+                  <svg class="icon"><use href="#i-plus"></use></svg>Dosya ekle
+                </button>
+                <button class="btn small ghost danger" id="batchClearBtn" title="Kuyruğu temizle" disabled>
+                  <svg class="icon"><use href="#i-trash"></use></svg>Temizle
+                </button>
+              </div>
+            </header>
+
+            <div class="batch-kind-tabs" role="tablist" aria-label="Toplu işlem türü">
+              <button class="batch-kind-tab active" data-batch-kind="video" role="tab" aria-pressed="true">
+                <svg class="icon"><use href="#i-video"></use></svg>
+                <span>Video</span><b id="batchCountVideo">0</b>
+              </button>
+              <button class="batch-kind-tab" data-batch-kind="photo" role="tab" aria-pressed="false">
+                <svg class="icon"><use href="#i-photo"></use></svg>
+                <span>Fotoğraf</span><b id="batchCountPhoto">0</b>
+              </button>
+              <button class="batch-kind-tab" data-batch-kind="gif" role="tab" aria-pressed="false">
+                <svg class="icon"><use href="#i-gif"></use></svg>
+                <span>GIF</span><b id="batchCountGif">0</b>
+              </button>
+              <button class="batch-kind-tab" data-batch-kind="merge" role="tab" aria-pressed="false" title="Videoları uç uca tek dosyada birleştir">
+                <svg class="icon"><use href="#i-film"></use></svg>
+                <span>Birleştir</span><b id="batchCountMerge">0</b>
+              </button>
+            </div>
+
+            <div class="batch-engine-warn" id="batchEngineWarn" hidden>
+              <svg class="icon"><use href="#i-alert"></use></svg>
+              <span>FFmpeg bulunamadı. Video ve GIF kuyrukları çalışmaz; fotoğraf kuyruğu kullanılabilir.</span>
+            </div>
+
+            <div class="batch-queue">
+              <div class="batch-empty" id="batchQueueEmpty">
+                <span class="batch-empty-icon"><svg class="icon"><use href="#i-layers"></use></svg></span>
+                <h3 id="batchEmptyTitle">Video kuyruğu boş</h3>
+                <p id="batchEmptyText">Birden çok videoya aynı ayarları tek seferde uygula.</p>
+                <div class="batch-empty-formats" id="batchEmptyFormats">MP4 · MOV · MKV · WEBM</div>
+                <button class="btn accent" id="batchEmptyAddBtn">
+                  <svg class="icon"><use href="#i-plus"></use></svg>Dosya ekle
+                </button>
+              </div>
+              <div class="batch-list" id="batchList" aria-live="polite"></div>
+            </div>
+
+            <footer class="batch-foot">
+              <div class="batch-foot-line">
+                <b id="batchFootCount">Kuyruk boş</b>
+                <span id="batchFootPercent">Hazır</span>
+              </div>
+              <div class="progress-track"><div class="progress-bar" id="batchFootBar"></div></div>
+              <span class="batch-foot-note" id="batchFootNote">Dosyalar sırayla işlenir.</span>
+            </footer>
+          </div>
+
+          <aside class="inspector batch-inspector">
+            <div class="inspector-scroll" id="batchInspectorScroll">
+              <div class="batch-settings-head">
+                <span class="batch-kicker">TOPLU AYARLAR</span>
+                <b id="batchSettingsTitle">Video ayarları</b>
+                <p id="batchSettingsHint">Seçimler kuyruktaki tüm videolara uygulanır.</p>
+              </div>
+
+              <div id="batchSettingsVideo" data-batch-settings="video">
+                <section class="group">
+                  <div class="group-head"><h3>Hazır ayar</h3></div>
+                  <label class="field"><span>Ayar</span><select id="batchVideoPresetSelect"></select></label>
+                  <p class="hint">Video düzenleyicide kaydettiğin ayarlar da burada listelenir.</p>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Kodlama</h3></div>
+                  <label class="field"><span>Codec</span>
+                    <select id="batchVideoCodec">
+                      <option value="h264" selected>H.264 · MP4 · uyumlu</option>
+                      <option value="h265">H.265 · MP4 · küçük</option>
+                      <option value="vp9">VP9 · WEBM · açık</option>
+                      <option value="prores">ProRes · MOV · arşiv</option>
+                    </select>
+                  </label>
+                  <label class="field" id="batchVideoEncoderField" hidden><span>Kodlayıcı</span>
+                    <select id="batchVideoEncoder">
+                      <option value="cpu" selected>İşlemci · en iyi sıkıştırma</option>
+                      <option value="gpu">Ekran kartı · çok daha hızlı</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Kalite modu</span>
+                    <select id="batchVideoQuality">
+                      <option value="copy" selected>Kayıpsız kopya</option>
+                      <option value="crf">CRF · sabit kalite</option>
+                      <option value="bitrate">Bit hızı</option>
+                      <option value="size">Hedef dosya boyutu</option>
+                    </select>
+                  </label>
+                  <div class="note-box batch-note" id="batchVideoCopyHint">
+                    <svg class="icon"><use href="#i-shield"></use></svg>
+                    <div><b>Yeniden kodlama yok</b><p>Video akışı kopyalanır; boyut seçilirse CRF'ye geçilir.</p></div>
+                  </div>
+                  <div class="batch-quality-pane" id="batchVideoCrfField" hidden>
+                    <div class="range-head"><span>CRF kalitesi</span><b id="batchVideoCrfValue">CRF 16</b></div>
+                    <input class="range" type="range" id="batchVideoCrf" min="10" max="30" step="1" value="16">
+                    <div class="range-scale"><span>Daha yüksek kalite</span><span>Daha küçük dosya</span></div>
+                    <label class="field"><span>İşlem hızı</span>
+                      <select id="batchVideoPreset">
+                        <option value="fast">Hızlı</option>
+                        <option value="medium" selected>Dengeli</option>
+                        <option value="slow">Yüksek kalite</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="batch-quality-pane" id="batchVideoBitrateField" hidden>
+                    <label class="field"><span>Video bit hızı <small>kbps</small></span>
+                      <input type="number" id="batchVideoBitrate" min="100" max="200000" step="100" value="8000" inputmode="numeric">
+                    </label>
+                    <p class="hint">Hedef bit hızı tüm videolara uygulanır. Kaynağın altına düşerse kalite azalabilir.</p>
+                  </div>
+                  <div class="batch-quality-pane" id="batchVideoSizeField" hidden>
+                    <label class="field"><span>Dosya başına en fazla <small>MB</small></span>
+                      <input type="number" id="batchVideoTargetMB" min="0.1" max="100000" step="0.5" value="10" inputmode="decimal">
+                    </label>
+                    <p class="hint">Her video iki geçişte bu boyutun altına sığdırılır. Hedefe sığmayacak kadar uzun videolar hata olarak işaretlenir.</p>
+                  </div>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Boyut ve ses</h3></div>
+                  <label class="field"><span>Uzun kenar sınırı</span>
+                    <select id="batchVideoWidth">
+                      <option value="0" selected>Orijinal boyut</option>
+                      <option value="1920">En fazla 1920 px</option>
+                      <option value="1280">En fazla 1280 px</option>
+                      <option value="854">En fazla 854 px</option>
+                      <option value="640">En fazla 640 px</option>
+                    </select>
+                  </label>
+                  <p class="hint">Küçük videolar büyütülmez; en-boy oranı korunur.</p>
+                  <label class="field"><span>Ses çıktısı</span>
+                    <select id="batchVideoAudio">
+                      <option value="original" selected>Orijinal (kopyala)</option>
+                      <option value="aac">AAC 320 kbps</option>
+                      <option value="none">Sessiz</option>
+                    </select>
+                  </label>
+                  <p class="hint">Ses, kapsayıcı destekliyorsa yeniden kodlanmadan kopyalanır.</p>
+                </section>
+              </div>
+
+              <div id="batchSettingsPhoto" data-batch-settings="photo" hidden>
+                <section class="group">
+                  <div class="group-head"><h3>Biçim ve kalite</h3></div>
+                  <label class="field"><span>Format</span>
+                    <select id="batchPhotoFormat">
+                      <option value="original" selected>Orijinal format</option>
+                      <option value="jpeg">JPEG · maksimum</option>
+                      <option value="png">PNG · kayıpsız</option>
+                      <option value="webp">WebP · kayıpsız</option>
+                      <option value="avif">AVIF · küçük dosya</option>
+                      <option value="tiff">TIFF · kayıpsız</option>
+                    </select>
+                  </label>
+                  <label class="field" id="batchPhotoQualityField"><span>Kalite</span>
+                    <select id="batchPhotoQuality">
+                      <option value="max" selected>Maksimum</option>
+                      <option value="high">Yüksek</option>
+                      <option value="balanced">Dengeli</option>
+                    </select>
+                  </label>
+                  <div class="switch-row compact">
+                    <div><b>EXIF &amp; renk profilini koru</b><span class="sub">Oryantasyon otomatik düzeltilir.</span></div>
+                    <button class="switch on" id="batchPhotoMetadata" role="switch" aria-checked="true"><i></i></button>
+                  </div>
+                </section>
+
+                <section class="group">
+                  <div class="group-head"><h3>Boyut</h3></div>
+                  <label class="field"><span>Uzun kenar</span>
+                    <select id="batchPhotoMaxEdge">
+                      <option value="0" selected>Orijinal boyut</option>
+                      <option value="3840">En fazla 3840 px</option>
+                      <option value="2560">En fazla 2560 px</option>
+                      <option value="1920">En fazla 1920 px</option>
+                      <option value="1280">En fazla 1280 px</option>
+                      <option value="1080">En fazla 1080 px</option>
+                      <option value="800">En fazla 800 px</option>
+                    </select>
+                  </label>
+                  <p class="hint">Küçük fotoğraflar büyütülmez; en-boy oranı korunur.</p>
+                </section>
+              </div>
+
+              <div id="batchSettingsGif" data-batch-settings="gif" hidden>
+                <section class="group">
+                  <div class="group-head"><h3>GIF ayarları</h3></div>
+                  <label class="field"><span>Oran</span>
+                    <select id="batchGifRatio">
+                      <option value="auto" selected>Kaynağa göre</option>
+                      <option value="1:1">1:1 · kare</option>
+                      <option value="4:3">4:3</option>
+                      <option value="16:9">16:9</option>
+                      <option value="9:16">9:16 · dikey</option>
+                      <option value="4:5">4:5</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Genişlik</span>
+                    <select id="batchGifWidth">
+                      <option value="320">320 px · küçük</option>
+                      <option value="480" selected>480 px · dengeli</option>
+                      <option value="640">640 px · net</option>
+                      <option value="800">800 px · büyük</option>
+                    </select>
+                  </label>
+                  <div class="field-row">
+                    <label class="field"><span>FPS</span>
+                      <select id="batchGifFps">
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                        <option value="12" selected>12</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="24">24</option>
+                      </select>
+                    </label>
+                    <label class="field"><span>Döngü</span>
+                      <select id="batchGifLoop">
+                        <option value="0" selected>Sonsuz</option>
+                        <option value="1">1</option>
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label class="field"><span>Video süresi</span>
+                    <select id="batchGifSeconds">
+                      <option value="0" selected>Tümü · sınır içindeyse</option>
+                      <option value="3">İlk 3 saniye</option>
+                      <option value="5">İlk 5 saniye</option>
+                      <option value="10">İlk 10 saniye</option>
+                      <option value="15">İlk 15 saniye</option>
+                      <option value="30">İlk 30 saniye</option>
+                    </select>
+                  </label>
+                  <p class="hint" id="batchGifHint">GIF ses içermez ve 256 renk kullanır. Her dosya ayrı kaydedilir; uzun videolarda süre sınırı seç.</p>
+                </section>
+              </div>
+
+              <div id="batchSettingsMerge" data-batch-settings="merge" hidden>
+                <section class="group">
+                  <div class="group-head"><h3>Birleştirme</h3></div>
+                  <div class="note-box batch-note" id="batchMergeStatus">
+                    <svg class="icon"><use href="#i-shield"></use></svg>
+                    <div><b id="batchMergeStatusTitle">En az iki video ekle</b><p id="batchMergeStatusText">Videolar listedeki sırayla tek dosyada birleştirilir.</p></div>
+                  </div>
+                  <label class="field"><span>Yöntem</span>
+                    <select id="batchMergeMode">
+                      <option value="auto" selected>Otomatik · uyumluysa kayıpsız</option>
+                      <option value="reencode">Her zaman yeniden kodla</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Codec <small>yeniden kodlamada</small></span>
+                    <select id="batchMergeCodec">
+                      <option value="h264" selected>H.264 · MP4 · uyumlu</option>
+                      <option value="h265">H.265 · MP4 · küçük</option>
+                      <option value="vp9">VP9 · WEBM · açık</option>
+                    </select>
+                  </label>
+                  <div class="range-head"><span>CRF kalitesi</span><b id="batchMergeCrfValue">CRF 18</b></div>
+                  <input class="range" type="range" id="batchMergeCrf" min="10" max="30" step="1" value="18">
+                  <label class="field"><span>İşlem hızı</span>
+                    <select id="batchMergePreset">
+                      <option value="fast">Hızlı</option>
+                      <option value="medium" selected>Dengeli</option>
+                      <option value="slow">Yüksek kalite</option>
+                    </select>
+                  </label>
+                  <label class="field" id="batchMergeEncoderField" hidden><span>Kodlayıcı</span>
+                    <select id="batchMergeEncoder">
+                      <option value="cpu" selected>İşlemci · en iyi sıkıştırma</option>
+                      <option value="gpu">Ekran kartı · çok daha hızlı</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Ses</span>
+                    <select id="batchMergeAudio">
+                      <option value="original" selected>Koru</option>
+                      <option value="none">Sessiz</option>
+                    </select>
+                  </label>
+                  <p class="hint">Videolar listedeki sırayla eklenir; sırayı oklarla değiştir. Yeniden kodlamada tümü ilk videonun boyutuna ve kare hızına getirilir, oran korunur.</p>
+                </section>
+              </div>
+
+              <section class="group batch-save-group">
+                <div class="group-head"><h3>Kayıt</h3><span class="group-note" id="batchSaveNote">Her dosya ayrı</span></div>
+                <span class="field-label">Klasör</span>
+                <button class="folder-btn" id="batchFolderBtn">
+                  <svg class="icon"><use href="#i-folder"></use></svg>
+                  <span id="batchFolderPath">Klasör seç</span>
+                  <svg class="icon chevron"><use href="#i-chevron"></use></svg>
+                </button>
+                <p class="hint">Dosya adları kaynak adından türetilir; çakışırsa otomatik numaralandırılır.</p>
+              </section>
+            </div>
+
+            <div class="export-dock">
+              <div class="export-summary">
+                <span class="summary-label">ÇIKTI</span>
+                <b id="batchSummary">Hazır değil</b>
+                <small id="batchOutNote">Kuyruğa dosya ekle</small>
+              </div>
+              <div class="batch-run-actions">
+                <button class="btn ghost danger" id="batchCancelBtn" hidden>İptal</button>
+                <button class="btn accent export-btn" id="batchStartBtn" disabled>
+                  <svg class="icon"><use href="#i-download"></use></svg>
+                  <span>Kuyruğu başlat</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="drop-overlay" id="dropOverlay" hidden>
+    <div class="drop-overlay-card">
+      <svg class="icon"><use href="#i-upload"></use></svg>
+      <b>Bırak, gerisini Odak halleder.</b>
+      <span id="dropOverlayHint">Video veya fotoğraf</span>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <dialog class="modal export-modal" id="exportDialog">
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow" id="exportEyebrow"><span></span>DIŞA AKTARILIYOR</div>
+        <h2 id="exportTitle">Dosya hazırlanıyor</h2>
+      </div>
+      <button class="icon-btn" id="exportCloseX" title="Kapat"><svg class="icon"><use href="#i-close"></use></svg></button>
+    </div>
+
+    <div id="exportRunning">
+      <div class="progress-track"><div class="progress-bar" id="exportBar"></div></div>
+      <div class="progress-meta"><b id="exportPercent">%0</b><span id="exportStats">Başlıyor…</span></div>
+      <div class="export-file-line" id="exportDetail">—</div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="cancelExportBtn">İptal et</button>
+        <span class="modal-note">Süre, kaynak ve codec'e göre değişir.</span>
+      </div>
+    </div>
+
+    <div id="exportDone" hidden>
+      <div class="done-badge"><svg class="icon"><use href="#i-check"></use></svg></div>
+      <h3 id="exportDoneTitle">Dışa aktarma tamamlandı</h3>
+      <p class="muted" id="exportDoneDesc">—</p>
+      <div class="done-meta" id="exportDoneMeta"></div>
+      <div class="modal-actions">
+        <button class="btn accent" id="exportShowBtn"><svg class="icon"><use href="#i-folder"></use></svg>Klasörde göster</button>
+        <button class="btn ghost" id="exportOpenBtn"><svg class="icon"><use href="#i-external"></use></svg>Dosyayı aç</button>
+        <button class="btn ghost" id="exportDoneClose">Kapat</button>
+      </div>
+    </div>
+
+    <div id="exportError" hidden>
+      <div class="error-badge"><svg class="icon"><use href="#i-alert"></use></svg></div>
+      <h3 id="exportErrorTitle">İşlem tamamlanamadı</h3>
+      <p class="muted" id="exportErrorMessage">—</p>
+      <pre class="error-details hidden" id="exportErrorDetails"></pre>
+      <div class="modal-actions">
+        <button class="btn ghost" id="exportErrorClose">Kapat</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal help-modal" id="helpDialog">
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow"><span></span>ODAK STUDIO</div>
+        <h2>Yardım &amp; kısayollar</h2>
+      </div>
+      <button class="icon-btn" id="helpCloseX"><svg class="icon"><use href="#i-close"></use></svg></button>
+    </div>
+    <div class="help-body">
+      <div class="help-section">
+        <h3>Kısayollar</h3>
+        <div class="shortcut-row"><span>Dosya aç</span><kbd>Ctrl</kbd><kbd>O</kbd></div>
+        <div class="shortcut-row"><span>Oynat / durdur</span><kbd>Space</kbd></div>
+        <div class="shortcut-row"><span>Videoda kare ileri / geri</span><kbd>←</kbd><kbd>→</kbd></div>
+        <div class="shortcut-row"><span>Giriş / çıkış noktası (oynatma konumu)</span><kbd>I</kbd><kbd>O</kbd></div>
+        <div class="shortcut-row"><span>Seçimi bölüm olarak ekle</span><kbd>B</kbd></div>
+        <div class="shortcut-row"><span>GIF'te önceki / sonraki klip</span><kbd>←</kbd><kbd>→</kbd></div>
+        <div class="shortcut-row"><span>Kırpmayı / önizlemeyi kapat</span><kbd>Esc</kbd></div>
+        <div class="shortcut-row"><span>Fotoğrafta geri al</span><kbd>Ctrl</kbd><kbd>Z</kbd></div>
+      </div>
+      <div class="help-section">
+        <h3>Kalite notları</h3>
+        <p>Kayıpsız kesimde FFmpeg akışı kopyalar; video yeniden kodlanmaz. Kırpma, döndürme veya hız değişikliği zorunlu olarak yeniden kodlama gerektirir. Bu durumda CRF 16 veya kaynak bit hızı ile çalışabilirsin.</p>
+        <p>JPEG her kayıtta yeniden kodlanır; fotoğrafta gerçek kayıpsızlık için PNG veya WebP seç. Hiç düzenleme yapmadıysan “Orijinal format” dosyayı birebir kopyalar.</p>
+        <p>GIF stüdyosu sesi atar ve 256 renk paleti kullanır. Uzun veya yüksek çözünürlüklü GIF'ler büyük dosyalar üretebilir; 60 saniye / 900 kare sınırı vardır.</p>
+      </div>
+      <div class="help-section">
+        <h3>Toplu işlem</h3>
+        <p>Toplu modda video, fotoğraf ve GIF için ayrı kuyruklar oluştur. Aynı ayarları kuyruktaki tüm dosyalara uygula; dosyalar sırayla işlenir ve bir dosyadaki hata sonrakileri durdurmaz.</p>
+        <p>Video kuyruğunda kayıpsız kopya, boyut değişikliği yoksa kullanılabilir. Fotoğraf kuyruğunda uzun kenar sınırı küçük görselleri büyütmez. GIF kuyruğunda her medya ayrı bir GIF olur; 60 saniye / 900 kare sınırı dosya bazında uygulanır.</p>
+      </div>
+      <div class="help-section">
+        <h3>Sistem</h3>
+        <div class="system-grid" id="systemGrid">
+          <span>FFmpeg</span><b id="helpFfmpeg">kontrol ediliyor…</b>
+          <span>Electron</span><b id="helpElectron">—</b>
+          <span>Odak Studio</span><b id="helpVersion">—</b>
+          <span>Güncelleme</span><b id="helpUpdateStatus">—</b>
+        </div>
+        <button class="btn small ghost help-update-btn" id="helpUpdateBtn">Güncellemeleri denetle</button>
+        <p class="hint" id="helpFfmpegHint">FFmpeg bulunamazsa videolar dışa aktarılamaz.</p>
+        <label class="field help-language"><span>Dil</span>
+          <select id="helpLanguage"></select>
+        </label>
+        <p class="hint">Dil değişikliği uygulamayı yeniden yükler.</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="helpCloseBtn">Kapat</button>
+    </div>
+  </dialog>
+
+  <script src="./i18n.js"></script>
+  <script src="./shared.js"></script>
+  <script src="./ui.js"></script>
+  <script src="./crop.js"></script>
+  <script src="./text-layers.js"></script>
+  <script src="./video.js"></script>
+  <script src="./photo.js"></script>
+  <script src="./gif.js"></script>
+  <script src="./batch-plan.js"></script>
+  <script src="./batch.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

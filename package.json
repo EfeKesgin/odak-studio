@@ -1,0 +1,100 @@
+{
+  "name": "odak-studio",
+  "productName": "Odak Studio",
+  "version": "1.0.0",
+  "description": "Kalite kaybı olmadan video ve fotoğraf düzenleme stüdyosu",
+  "main": "electron/main.js",
+  "author": "Odak",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EfeKesgin/odak-studio.git"
+  },
+  "homepage": "https://github.com/EfeKesgin/odak-studio",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "test": "node test/static-check.test.js && node test/util.test.js && node test/video-filters.test.js && node test/color.test.js && node test/photo-pipeline.test.js && node test/gif-plan.test.js && node test/batch-plan.test.js && node test/video-transport.test.js && node test/i18n.test.js",
+    "ffmpeg": "node scripts/prepare-ffmpeg.js",
+    "pack": "npm run ffmpeg && electron-builder --win dir",
+    "dist": "npm run ffmpeg && electron-builder --win nsis",
+    "release": "npm test && npm run ffmpeg && electron-builder --win nsis --publish always"
+  },
+  "build": {
+    "appId": "com.odak.studio",
+    "productName": "Odak Studio",
+    "copyright": "Copyright © 2026 Odak · GPL-3.0-or-later",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "EfeKesgin",
+        "repo": "odak-studio",
+        "releaseType": "release"
+      }
+    ],
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "assets/**/*",
+      "package.json",
+      "LICENSE"
+    ],
+    "asarUnpack": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/**/*"
+    ],
+    "npmRebuild": false,
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin",
+        "filter": [
+          "ffmpeg.exe",
+          "ffprobe.exe"
+        ]
+      },
+      {
+        "from": "bin",
+        "to": "licenses",
+        "filter": [
+          "FFMPEG-*.txt"
+        ]
+      },
+      {
+        "from": "LICENSE",
+        "to": "licenses/ODAK-STUDIO-LICENSE.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Odak Studio",
+      "artifactName": "OdakStudio-Setup-${version}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "sharp": "^0.35.5"
+  }
+}
