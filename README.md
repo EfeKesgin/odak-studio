@@ -8,7 +8,6 @@
 Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayarından hiç çıkmaz.
 
 [![Son sürüm](https://img.shields.io/github/v/release/EfeKesgin/odak-studio?label=s%C3%BCr%C3%BCm)](https://github.com/EfeKesgin/odak-studio/releases/latest)
-[![Testler](https://github.com/EfeKesgin/odak-studio/actions/workflows/test.yml/badge.svg)](https://github.com/EfeKesgin/odak-studio/actions/workflows/test.yml)
 [![Lisans: GPL-3.0](https://img.shields.io/badge/lisans-GPL--3.0-blue)](LICENSE)
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6)
 
