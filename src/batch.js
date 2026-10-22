@@ -1041,7 +1041,7 @@
         let quality = `CRF ${settings.crf} · ${settings.preset}`;
         if (settings.quality === 'copy') quality = 'kayıpsız kopya';
         else if (settings.quality === 'bitrate') quality = `${settings.bitrateKbps} kbps`;
-        else if (settings.quality === 'size') quality = `dosya başına en fazla ${settings.targetMB.toLocaleString('tr-TR')} MB`;
+        else if (settings.quality === 'size') quality = `dosya başına en fazla ${window.OdakUI.formatNumber(settings.targetMB)} MB`;
         const width = settings.maxWidth ? `uzun kenar ${settings.maxWidth} px` : 'orijinal boyut';
         const audio = settings.audioMode === 'none'
           ? 'ses yok'

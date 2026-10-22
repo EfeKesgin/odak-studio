@@ -333,7 +333,7 @@
     }
 
     renderSize(layer) {
-      this.sizeLabel.textContent = `%${layer.size.toLocaleString('tr-TR')}`;
+      this.sizeLabel.textContent = `%${window.OdakUI.formatNumber(layer.size)}`;
       const min = Number(this.sizeInput.min);
       const max = Number(this.sizeInput.max);
       const fill = ((layer.size - min) / (max - min)) * 100;

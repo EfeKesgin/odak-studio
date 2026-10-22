@@ -59,10 +59,22 @@ for (const f of rendererFiles) {
 }
 ok(`getElementById referanslari (${idRefs} adet)`);
 
-// 5) UTF-8 gecerliligi
+// 5) "Birlikte ac" kurulum betigi, uygulamanin actigi uzantilarla ayni olmali
+{
+  const shared = require(path.join(root, 'src/shared.js'));
+  const unsupported = new Set(['bmp', 'jxl', 'heic', 'heif']);
+  const expected = [...shared.VIDEO_EXTENSIONS, ...shared.IMAGE_EXTENSIONS].filter((e) => !unsupported.has(e)).sort();
+  const nsh = fs.readFileSync(path.join(root, 'installer/open-with.nsh'), 'utf8');
+  const listed = [...nsh.matchAll(/insertmacro \$\{MACRO\} "\.([a-z0-9]+)"/g)].map((m) => m[1]).sort();
+  if (JSON.stringify(listed) !== JSON.stringify(expected)) fail(`open-with.nsh uzantilari farkli: ${listed.join(',')} != ${expected.join(',')}`);
+  if (require(path.join(root, 'package.json')).build.nsis.include !== 'installer/open-with.nsh') fail('nsis.include ayarli degil');
+  ok(`Birlikte ac uzantilari (${listed.length})`);
+}
+
+// 6) UTF-8 gecerliligi
 const files = [
   'package.json', 'README.md', '.gitignore', 'scripts/prepare-ffmpeg.js', 'scripts/publish-release.js',
-  'electron/main.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
+  'installer/open-with.nsh', 'electron/main.js', 'electron/logger.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
   'src/index.html', 'src/styles.css', 'src/ui.js', 'src/crop.js', 'src/text-layers.js', 'src/video.js', 'src/photo.js', 'src/gif.js',
   'src/i18n.js', 'src/shared.js', 'src/batch-plan.js', 'src/batch.js', 'src/app.js',
   'test/i18n.test.js',

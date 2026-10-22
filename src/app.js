@@ -19,6 +19,15 @@
 
   const api = window.odak;
   const i18n = window.OdakI18n;
+
+  // Arayüzde yakalanmayan hatalar hata kaydına yazılır.
+  window.addEventListener('error', (event) => {
+    api.writeLog({ level: 'error', message: event.message || 'Renderer error', details: event.error?.stack || `${event.filename}:${event.lineno}` }).catch(() => {});
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    api.writeLog({ level: 'error', message: reason?.message || String(reason), details: reason?.stack }).catch(() => {});
+  });
   const { t } = i18n;
 
   const VIDEO_EXTENSIONS = new Set(window.OdakShared.VIDEO_EXTENSIONS);
@@ -159,6 +168,7 @@
       setMode('video');
       renderMode();
       setupUpdates();
+      setupOpenWith();
       // GPU kodlayıcı tespiti ana süreçte arka planda sürer.
       api.hardware().then((hardware) => {
         appState.hardware = hardware;
@@ -392,6 +402,17 @@
     }
   }
 
+  // Gezginde "Birlikte aç" ile seçilen dosya: açılışta verilen ve uygulama
+  // açıkken gelenler aynı yoldan editöre yönlendirilir.
+  function setupOpenWith() {
+    try {
+      api.onOpenFile((file) => routeFile(file));
+      api.takeOpenFile().then((file) => { if (file) routeFile(file); }).catch(() => {});
+    } catch {
+      // Eski önyükleme betiği: özellik yok sayılır.
+    }
+  }
+
   async function routeFile(file, knownKind = null) {
     if (!appState.ready || !file) return;
     if (appState.opening) {
@@ -585,6 +606,20 @@
       photoEditor?.undo();
       return;
     }
+    // Videoda geri al (Ctrl+Z) ve yinele (Ctrl+Y veya Ctrl+Shift+Z).
+    if ((event.ctrlKey || event.metaKey) && appState.mode === 'video' && videoEditor) {
+      const key = event.key.toLowerCase();
+      if (key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        videoEditor.undo();
+        return;
+      }
+      if (key === 'y' || (key === 'z' && event.shiftKey)) {
+        event.preventDefault();
+        videoEditor.redo();
+        return;
+      }
+    }
     if (event.key === 'Escape') {
       if (appState.mode === 'batch' && batchEditor?.isRunning()) {
         batchEditor.cancel();
@@ -705,6 +740,14 @@
   }
 
   function setupUpdates() {
+    document.getElementById('helpLogBtn')?.addEventListener('click', () => {
+      api.openLog().then((opened) => {
+        // Varsayılan metin düzenleyicisi yoksa dosya klasörde gösterilir.
+        if (!opened) api.showLog().catch(() => {});
+      }).catch(() => {});
+    });
+    document.getElementById('helpLicensesBtn')?.addEventListener('click', () => api.openLicenses().catch(() => {}));
+    document.getElementById('helpWebsiteBtn')?.addEventListener('click', () => api.openWebsite().catch(() => {}));
     const button = document.getElementById('helpUpdateBtn');
     button?.addEventListener('click', () => {
       if (appState.update?.state === 'downloaded') installUpdate();
@@ -892,7 +935,7 @@
     const meta = [];
     if (result.targetBytes) {
       // Hedef ondalık MB ile girildiği için sonuç da aynı birimle gösterilir.
-      const mb = (bytes) => (bytes / 1e6).toLocaleString('tr-TR', { maximumFractionDigits: 2 });
+      const mb = (bytes) => window.OdakUI.formatNumber(bytes / 1e6, { maximumFractionDigits: 2 });
       meta.push(`${mb(result.size)} MB · hedef ${mb(result.targetBytes)} MB`);
     } else if (result.size) {
       meta.push(formatBytes(result.size));

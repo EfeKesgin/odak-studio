@@ -1,8 +1,10 @@
 node_modules/
 dist/
 out/
-# FFmpeg ikilileri (~450 MB) depoya girmez; "npm run ffmpeg" ile kopyalanır.
+# FFmpeg ikilileri (~200 MB) depoya girmez; "npm run ffmpeg" ile indirilip kopyalanır.
 bin/
 *.log
 .DS_Store
 Thumbs.db
+# İndirilen FFmpeg arşivi (npm run ffmpeg)
+.cache/

@@ -61,6 +61,12 @@
     return `${Math.round(bps / 1000)} kbps`;
   }
 
+  // Sayılar arayüz diline göre biçimlenir: Türkçede "9,5", İngilizcede "9.5".
+  function formatNumber(value, options) {
+    const locale = window.OdakI18n?.getLanguage() === 'en' ? 'en-US' : 'tr-TR';
+    return Number(value).toLocaleString(locale, options);
+  }
+
   function formatResolution(width, height) {
     if (!width || !height) return '—';
     return `${Math.round(width)} × ${Math.round(height)}`;
@@ -122,6 +128,8 @@
     const stack = document.getElementById('toastStack');
     if (!stack) return () => {};
     const type = ['error', 'warn', 'success'].includes(options.type) ? options.type : 'info';
+    // Kullanıcıya gösterilen hatalar, sorun bildirirken paylaşılabilsin diye kayda da yazılır.
+    if (type === 'error') window.odak?.writeLog?.({ level: 'error', message: String(message ?? '') }).catch(() => {});
     const element = document.createElement('div');
     element.className = `toast ${type}`;
 
@@ -196,6 +204,7 @@
     formatDuration,
     formatBitrate,
     formatResolution,
+    formatNumber,
     even,
     clamp,
     sanitizeBaseName,

@@ -1709,7 +1709,15 @@ kbd {
 .toggle-bold { font-weight: 800; }
 .toggle-italic { font-style: italic; }
 
-.help-update-btn {
+/* Yinele simgesi, geri al simgesinin yatay aynası */
+.icon-mirror .icon {
+  transform: scaleX(-1);
+}
+
+.help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-top: 10px;
 }
 

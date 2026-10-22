@@ -105,6 +105,7 @@ const samples = [
 for (const sample of samples) check(sample, 'örnek');
 
 // 4) Yardımcılar
+assert.equal(i18n.translate('%42'), '42%', 'yüzde işareti İngilizcede sona gelir');
 assert.equal(i18n.translate('  Kaydet  '), '  Save  ', 'boşluklar korunur');
 assert.equal(i18n.t('{n} dosya', { n: 3 }), '3 dosya', 'çevirisi olmayan şablon olduğu gibi kalır');
 assert.equal(i18n.languageForLocale('tr-TR'), 'tr');

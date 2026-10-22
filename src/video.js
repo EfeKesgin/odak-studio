@@ -26,6 +26,12 @@
     theora: 'Theora',
   };
 
+  // Geri al / yinele kapsamındaki düzenleme alanları.
+  const HISTORY_FIELDS = [
+    'inPoint', 'outPoint', 'segments', 'rotation', 'flipH', 'flipV', 'crop', 'resize',
+    'speed', 'audioMode', 'textLayers', 'burnSubtitle',
+  ];
+
   function sourceCodecLabel(codec) {
     return SOURCE_CODEC_LABELS[String(codec || '').toLowerCase()] || String(codec || '—').toUpperCase();
   }
@@ -55,6 +61,7 @@
       this.loadToken = 0;
       this.loadingTimer = null;
       this.hardware = null;
+      this.history = { undo: [], redo: [], lastKind: null, lastAt: 0 };
       this.scrubbing = null;
       this.handleDrag = null;
       this.reencodeNoticeShown = false;
@@ -69,6 +76,8 @@
         fileName: document.getElementById('videoFileName'),
         metaChips: document.getElementById('videoMetaChips'),
         replaceBtn: document.getElementById('videoReplaceBtn'),
+        undoBtn: document.getElementById('videoUndoBtn'),
+        redoBtn: document.getElementById('videoRedoBtn'),
         stage: document.getElementById('videoStage'),
         frame: document.getElementById('videoFrame'),
         video: document.getElementById('videoEl'),
@@ -230,6 +239,8 @@
     bind() {
       const els = this.els;
       els.replaceBtn.addEventListener('click', () => this.openVideo());
+      els.undoBtn.addEventListener('click', () => this.undo());
+      els.redoBtn.addEventListener('click', () => this.redo());
       els.playBtn.addEventListener('click', () => this.togglePlay());
       els.prevFrame.addEventListener('click', () => this.stepFrame(-1));
       els.nextFrame.addEventListener('click', () => this.stepFrame(1));
@@ -411,6 +422,7 @@
       this.textEditor.setLayers([]);
       this.textEditor.setHidden(false);
       this.renderSubtitles();
+      this.resetHistory();
       this.state.bitrateKbps = Math.max(100, Math.round((Number(meta.videoBitrate) || Number(meta.overallBitrate) || 4000) / 1000));
       this.state.baseName = `${fileStem(meta.name)}-odak`;
       this.lastAudioMode = this.state.audioMode === 'none' ? 'original' : this.state.audioMode;
@@ -571,6 +583,7 @@
 
     toggleMute() {
       if (!this.state.loaded) return;
+      this.remember('audio');
       if (this.state.meta && !this.state.meta.hasAudio) {
         toast('Bu videoda ses akışı yok.', { type: 'warn' });
         return;
@@ -590,6 +603,7 @@
 
     setAudioMode(mode) {
       if (!this.state.loaded) return;
+      this.remember('audio');
       const hasAudio = Boolean(this.state.meta?.hasAudio);
       this.state.audioMode = !hasAudio ? 'none' : ['original', 'aac', 'none'].includes(mode) ? mode : 'original';
       if (this.state.audioMode !== 'none') this.lastAudioMode = this.state.audioMode;
@@ -666,6 +680,7 @@
 
     applyCrop() {
       if (!this.state.cropActive) return;
+      this.remember('crop');
       const dims = this.getRotatedDims();
       const rect = this.cropOverlay.getRect();
       let x = Math.round(rect.x * dims.width);
@@ -708,6 +723,7 @@
 
     rotate(delta) {
       if (!this.state.loaded) return;
+      this.remember('rotate');
       this.cancelCrop();
       const hadCrop = Boolean(this.state.crop);
       if (hadCrop) this.state.crop = null;
@@ -726,6 +742,7 @@
 
     flip(axis) {
       if (!this.state.loaded) return;
+      this.remember('flip');
       this.cancelCrop();
       if (axis === 'h') this.state.flipH = !this.state.flipH;
       else this.state.flipV = !this.state.flipV;
@@ -745,6 +762,7 @@
 
     resetFrame() {
       if (!this.state.loaded) return;
+      this.remember('frame');
       this.cancelCrop();
       this.state.rotation = 0;
       this.state.flipH = false;
@@ -795,6 +813,7 @@
 
     setTextLayers(layers) {
       if (!this.state.loaded) return;
+      this.remember('text');
       this.state.textLayers = layers;
       this.ensureEditsQuality();
       this.renderQuality();
@@ -832,6 +851,7 @@
 
     setBurnSubtitle(index) {
       if (!this.state.loaded) return;
+      this.remember('subtitle');
       const tracks = this.state.meta?.subtitleTracks || [];
       this.state.burnSubtitle = Number.isInteger(index) && index >= 0 && index < tracks.length ? index : -1;
       this.ensureEditsQuality();
@@ -994,6 +1014,7 @@
 
     startHandleDrag(which, event) {
       if (!this.state.loaded || event.button !== 0) return;
+      this.remember();
       event.preventDefault();
       try { this.els.video.pause(); } catch { /* ignore */ }
       const move = (moveEvent) => {
@@ -1038,12 +1059,14 @@
 
     resetTrim() {
       if (!this.state.loaded) return;
+      this.remember();
       this.setTrim(0, this.state.duration);
       this.seekTo(0);
     }
 
     commitTrimFields() {
       if (!this.state.loaded) return;
+      this.remember();
       const start = parseNumber(this.els.trimStart.value, this.state.inPoint);
       const end = parseNumber(this.els.trimEnd.value, this.state.outPoint);
       this.setTrim(start, end);
@@ -1123,6 +1146,7 @@
 
     commitResize(changed) {
       if (!this.state.loaded) return;
+      this.remember('resize');
       const base = this.getBaseDims();
       if (!base.width || !base.height) return;
       let width = parseNumber(this.els.resizeW.value, 0);
@@ -1155,6 +1179,7 @@
 
     applyScale(factor) {
       if (!this.state.loaded) return;
+      this.remember();
       const base = this.getBaseDims();
       const cleanFactor = clamp(Number(factor) || 1, 0.1, 1);
       if (cleanFactor >= 0.999) {
@@ -1180,6 +1205,7 @@
 
     setSpeed(speed) {
       if (!this.state.loaded) return;
+      this.remember();
       this.state.speed = clamp(Number(speed) || 1, 0.25, 4);
       if (!this.state.videoBroken) {
         try { this.els.video.playbackRate = this.state.speed; } catch { /* ignore */ }
@@ -1240,7 +1266,7 @@
       }
       const sourceKbps = Math.round((this.state.meta.videoBitrate || this.state.meta.overallBitrate || 0) / 1000);
       this.els.bitrateHint.textContent = sourceKbps
-        ? `Kaynak video: ~${sourceKbps.toLocaleString('tr-TR')} kbps. Değer kaynağın altına inerse kalite düşer.`
+        ? `Kaynak video: ~${window.OdakUI.formatNumber(sourceKbps)} kbps. Değer kaynağın altına inerse kalite düşer.`
         : 'Kaynak bit hızı okunamadı. Yüksek bir değer seçin.';
       const belowSource = sourceKbps > 0 && this.state.bitrateKbps < sourceKbps * 0.85;
       this.els.bitrateWarn.hidden = !belowSource;
@@ -1493,11 +1519,11 @@
         ? 'Ekran kartının çok geçişli modunda kodlanır'
         : 'İki geçişte kodlanır';
       this.els.sizeHint.textContent = rates.feasible
-        ? `Video ~${rates.videoKbps.toLocaleString('tr-TR')} kbps${audioPart}. ${passes}; çıktı hedefin altında kalır.`
+        ? `Video ~${window.OdakUI.formatNumber(rates.videoKbps)} kbps${audioPart}. ${passes}; çıktı hedefin altında kalır.`
         : `${passes}; çıktı hedefin altında kalır.`;
       let warning = '';
       if (!rates.feasible) {
-        warning = `Hedef bu süre için çok küçük. En az ${rates.minMB.toLocaleString('tr-TR')} MB seçin, videoyu kısaltın veya sesi kapatın.`;
+        warning = `Hedef bu süre için çok küçük. En az ${window.OdakUI.formatNumber(rates.minMB)} MB seçin, videoyu kısaltın veya sesi kapatın.`;
       } else {
         // Piksel başına bit çok düşükse görüntü belirgin şekilde bozulur.
         const dims = this.getOutputDims();
@@ -1688,6 +1714,7 @@
 
     addSegment() {
       if (!this.state.loaded) return;
+      this.remember();
       const start = Math.round(this.state.inPoint * 1000) / 1000;
       const end = Math.round(this.state.outPoint * 1000) / 1000;
       if (end - start < 0.04) {
@@ -1705,6 +1732,7 @@
 
     removeSegment(index) {
       if (!this.state.segments[index]) return;
+      this.remember();
       this.state.segments.splice(index, 1);
       this.segmentsChanged();
     }
@@ -1717,10 +1745,77 @@
       this.seekTo(segment.start);
     }
 
+    // ── Geri al / yinele ──
+    // Düzenlemeler (kesim, bölümler, kadraj, hız, ses, metin, altyazı) her
+    // değişiklikten önce anlık görüntü olarak saklanır. Çıktı ayarları
+    // (codec, kalite) bu geçmişe girmez. Aynı türden art arda gelen
+    // değişiklikler (yazı yazmak, sürüklemek) bir saniye içinde tek adım sayılır.
+    historySnapshot() {
+      const snapshot = {};
+      for (const key of HISTORY_FIELDS) snapshot[key] = this.state[key];
+      return JSON.parse(JSON.stringify(snapshot));
+    }
+
+    remember(kind) {
+      if (!this.state.loaded) return;
+      const now = Date.now();
+      if (kind && kind === this.history.lastKind && now - this.history.lastAt < 1000) {
+        this.history.lastAt = now;
+        return;
+      }
+      this.history.undo.push(this.historySnapshot());
+      if (this.history.undo.length > 100) this.history.undo.shift();
+      this.history.redo = [];
+      this.history.lastKind = kind;
+      this.history.lastAt = now;
+      this.renderHistory();
+    }
+
+    resetHistory() {
+      this.history = { undo: [], redo: [], lastKind: null, lastAt: 0 };
+      this.renderHistory();
+    }
+
+    undo() {
+      if (!this.state.loaded || !this.history.undo.length) return;
+      this.history.redo.push(this.historySnapshot());
+      this.restoreSnapshot(this.history.undo.pop());
+    }
+
+    redo() {
+      if (!this.state.loaded || !this.history.redo.length) return;
+      this.history.undo.push(this.historySnapshot());
+      this.restoreSnapshot(this.history.redo.pop());
+    }
+
+    restoreSnapshot(snapshot) {
+      this.cancelCrop();
+      Object.assign(this.state, JSON.parse(JSON.stringify(snapshot)));
+      this.history.lastKind = null;
+      this.textEditor.setLayers(this.state.textLayers);
+      this.state.textLayers = this.textEditor.getLayers();
+      this.els.video.muted = this.state.audioMode === 'none';
+      if (!this.state.videoBroken) {
+        try { this.els.video.playbackRate = this.state.speed; } catch { /* ignore */ }
+      }
+      this.state.presetId = '';
+      this.ensureEditsQuality();
+      this.render();
+      this.renderSubtitles();
+      this.renderHistory();
+    }
+
+    renderHistory() {
+      if (!this.els.undoBtn) return;
+      this.els.undoBtn.disabled = !this.state.loaded || !this.history.undo.length;
+      this.els.redoBtn.disabled = !this.state.loaded || !this.history.redo.length;
+    }
+
     // Giriş noktası çıkışı geçerse çıkış videonun sonuna taşınır (ve tersi);
     // böylece bir sonraki bölüm, öncekinin bitişine sıkışıp onunla birleşmez.
     markIn() {
       if (!this.state.loaded) return;
+      this.remember();
       const time = this.state.currentTime;
       const end = time < this.state.outPoint - 0.04 ? this.state.outPoint : this.state.duration;
       this.setTrim(time, end, false);
@@ -1728,6 +1823,7 @@
 
     markOut() {
       if (!this.state.loaded) return;
+      this.remember();
       const time = this.state.currentTime;
       const start = time > this.state.inPoint + 0.04 ? this.state.inPoint : 0;
       this.setTrim(start, time, false);
@@ -1830,9 +1926,9 @@
         // "Video kayıpsız" denir.
         summary = `Video kayıpsız · ${ext} · ${formatResolution(dims.width, dims.height)}`;
       } else if (this.state.quality === 'bitrate') {
-        summary = `${CODEC_LABELS[this.state.codec]} · ${this.state.bitrateKbps.toLocaleString('tr-TR')} kbps · ${formatResolution(dims.width, dims.height)}`;
+        summary = `${CODEC_LABELS[this.state.codec]} · ${window.OdakUI.formatNumber(this.state.bitrateKbps)} kbps · ${formatResolution(dims.width, dims.height)}`;
       } else if (this.state.quality === 'size') {
-        summary = `${CODEC_LABELS[this.state.codec]} · en fazla ${this.state.targetMB.toLocaleString('tr-TR')} MB · ${formatResolution(dims.width, dims.height)}`;
+        summary = `${CODEC_LABELS[this.state.codec]} · en fazla ${window.OdakUI.formatNumber(this.state.targetMB)} MB · ${formatResolution(dims.width, dims.height)}`;
       } else {
         summary = `${CODEC_LABELS[this.state.codec]} · ${this.state.codec === 'prores' ? '422 HQ' : `CRF ${this.state.crf}`} · ${formatResolution(dims.width, dims.height)}`;
       }
@@ -1942,7 +2038,7 @@
       if (this.state.quality === 'size') {
         const rates = this.sizeRates();
         if (!rates.feasible) {
-          toast(`Hedef boyut bu süre için çok küçük. En az ${rates.minMB.toLocaleString('tr-TR')} MB seçin.`, { type: 'warn' });
+          toast(`Hedef boyut bu süre için çok küçük. En az ${window.OdakUI.formatNumber(rates.minMB)} MB seçin.`, { type: 'warn' });
           return;
         }
       }

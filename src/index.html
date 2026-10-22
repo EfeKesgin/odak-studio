@@ -169,6 +169,12 @@
                 </div>
               </div>
               <div class="head-actions">
+                <button class="icon-btn" id="videoUndoBtn" title="Geri al (Ctrl+Z)" disabled>
+                  <svg class="icon"><use href="#i-undo"></use></svg>
+                </button>
+                <button class="icon-btn icon-mirror" id="videoRedoBtn" title="Yinele (Ctrl+Y)" disabled>
+                  <svg class="icon"><use href="#i-undo"></use></svg>
+                </button>
                 <button class="icon-btn" id="videoReplaceBtn" title="Başka video aç">
                   <svg class="icon"><use href="#i-upload"></use></svg>
                 </button>
@@ -1218,6 +1224,7 @@
         <div class="shortcut-row"><span>Videoda kare ileri / geri</span><kbd>←</kbd><kbd>→</kbd></div>
         <div class="shortcut-row"><span>Giriş / çıkış noktası (oynatma konumu)</span><kbd>I</kbd><kbd>O</kbd></div>
         <div class="shortcut-row"><span>Seçimi bölüm olarak ekle</span><kbd>B</kbd></div>
+        <div class="shortcut-row"><span>Videoda geri al / yinele</span><kbd>Ctrl</kbd><kbd>Z</kbd><kbd>Ctrl</kbd><kbd>Y</kbd></div>
         <div class="shortcut-row"><span>GIF'te önceki / sonraki klip</span><kbd>←</kbd><kbd>→</kbd></div>
         <div class="shortcut-row"><span>Kırpmayı / önizlemeyi kapat</span><kbd>Esc</kbd></div>
         <div class="shortcut-row"><span>Fotoğrafta geri al</span><kbd>Ctrl</kbd><kbd>Z</kbd></div>
@@ -1241,7 +1248,13 @@
           <span>Odak Studio</span><b id="helpVersion">—</b>
           <span>Güncelleme</span><b id="helpUpdateStatus">—</b>
         </div>
-        <button class="btn small ghost help-update-btn" id="helpUpdateBtn">Güncellemeleri denetle</button>
+        <div class="help-actions">
+          <button class="btn small ghost" id="helpUpdateBtn">Güncellemeleri denetle</button>
+          <button class="btn small ghost" id="helpLogBtn" title="Bir sorun bildirirken bu dosyayı paylaşabilirsin">Hata kaydını aç</button>
+          <button class="btn small ghost" id="helpLicensesBtn">Lisanslar</button>
+          <button class="btn small ghost" id="helpWebsiteBtn">GitHub sayfası</button>
+        </div>
+        <p class="hint">Odak Studio açık kaynaklı, ücretsiz bir yazılımdır (GPL-3.0). Hata kaydı yalnızca bu bilgisayarda tutulur.</p>
         <p class="hint" id="helpFfmpegHint">FFmpeg bulunamazsa videolar dışa aktarılamaz.</p>
         <label class="field help-language"><span>Dil</span>
           <select id="helpLanguage"></select>

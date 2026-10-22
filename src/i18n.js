@@ -154,6 +154,11 @@
     'Sistem': 'System',
     'Dil': 'Language',
     'Güncelleme': 'Updates',
+    'Hata kaydını aç': 'Open error log',
+    'Bir sorun bildirirken bu dosyayı paylaşabilirsin': 'You can share this file when reporting a problem',
+    'Lisanslar': 'Licenses',
+    'GitHub sayfası': 'GitHub page',
+    'Odak Studio açık kaynaklı, ücretsiz bir yazılımdır (GPL-3.0). Hata kaydı yalnızca bu bilgisayarda tutulur.': 'Odak Studio is free, open-source software (GPL-3.0). The error log stays on this computer.',
     'Güncellemeleri denetle': 'Check for updates',
     'Yeniden başlat ve güncelle': 'Restart and update',
     'Şimdi yeniden başlat': 'Restart now',
@@ -366,6 +371,9 @@
     'Döndürme ve kırpma pikselleri yeniden işler; çıktıda PNG veya WebP seçerek kayıpsız kalırsın.': 'Rotating and cropping reprocess pixels; choose PNG or WebP to stay lossless.',
     'Geri al': 'Undo',
     'Geri al (Ctrl Z)': 'Undo (Ctrl Z)',
+    'Geri al (Ctrl+Z)': 'Undo (Ctrl+Z)',
+    'Yinele (Ctrl+Y)': 'Redo (Ctrl+Y)',
+    'Videoda geri al / yinele': 'Video: undo / redo',
     'Tüm düzenlemeleri sıfırla': 'Reset all edits',
     'Dönüştür': 'Transform',
     'Boyutu uygula': 'Apply size',
@@ -684,6 +692,7 @@
   // çevirebilmek için tr (çeviri) fonksiyonunu alır.
   const EN_PATTERNS = [
     // Süre ve birimler (formatDuration, formatTimecode yanında)
+    [/^%(\d+(?:[.,]\d+)?)$/, '$1%'],
     [/^(\d+(?:[.,]\d+)?) sn$/, '$1 s'],
     [/^(\d+) dk (\d+) sn$/, '$1 min $2 s'],
     [/^(\d+) sa (\d+) dk$/, '$1 h $2 min'],

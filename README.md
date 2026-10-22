@@ -30,6 +30,7 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
 | **Fotoğraf** | Kırp, döndür, boyutlandır; JPEG, PNG, WebP, AVIF, TIFF. Renk profili ve EXIF korunur. |
 | **GIF** | Video ve fotoğraflardan GIF; klip sırası, kırpma, hız, FPS, üst/alt yazı. |
 | **Toplu işlem** | Yüzlerce dosyayı aynı ayarla dönüştür; videoları tek dosyada birleştir. |
+| **Kolay kullanım** | Gezginde sağ tık → **Birlikte aç → Odak Studio**; videoda geri al / yinele (Ctrl+Z / Ctrl+Y). |
 | **Dil** | Türkçe ve İngilizce arayüz. |
 
 <table>
@@ -56,6 +57,9 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
   internete tek bağlantısı, açılışta GitHub'da yeni sürüm olup olmadığına bakmaktır (internet
   yoksa uygulama normal çalışır).
 - **Gizli ücret yok:** Deneme süresi, filigran, kısıtlı özellik veya hesap yok.
+- **Sorun olursa:** Yardım → **Hata kaydını aç** ile oluşan kayıt dosyasını bir
+  [sorun bildirimi](https://github.com/EfeKesgin/odak-studio/issues) ile paylaşabilirsin. Kayıt
+  yalnızca senin bilgisayarında tutulur, hiçbir yere gönderilmez.
 
 ### Windows "tanınmayan uygulama" uyarısı
 
@@ -107,15 +111,17 @@ Kaynaktan çalıştırmak ve paketlemek için:
 - Node.js 20 veya üzeri
 - FFmpeg ve FFprobe (8.x önerilir, GPL derleme)
 
-Geliştirme sırasında FFmpeg sistem PATH'inde olabilir ya da proje kökündeki `bin/` klasörüne
-konabilir (`npm run ffmpeg` bunu otomatik yapar):
+`npm run ffmpeg`, sabitlenmiş gyan.dev FFmpeg 8.1.2 "essentials" derlemesini indirir,
+SHA-256 değerini doğrular (`.cache/ffmpeg/`, yalnızca ilk seferde) ve proje kökündeki
+`bin/` klasörüne kopyalar:
 
 ```
 bin/ffmpeg.exe
 bin/ffprobe.exe
 ```
 
-Alternatif olarak `ODAK_FFMPEG` ortam değişkeniyle ffmpeg.exe yolunu gösterebilirsin.
+`bin/` yoksa uygulama PATH'teki FFmpeg'i kullanır. Alternatif olarak `ODAK_FFMPEG` ortam
+değişkeniyle ffmpeg.exe yolunu gösterebilirsin.
 
 ### Kurulum ve çalıştırma
 
@@ -138,8 +144,9 @@ npm run dist
 
 Bu komut önce `scripts/prepare-ffmpeg.js` ile FFmpeg/FFprobe'u ve FFmpeg'in lisans/kaynak
 bilgisini `bin/` klasörüne kopyalar, ardından electron-builder ile
-`dist/OdakStudio-Setup-<sürüm>.exe` kurulum dosyasını üretir. FFmpeg varsayılan olarak
-PATH'ten alınır; başka bir derleme kullanmak için klasörü ver:
+`dist/OdakStudio-Setup-<sürüm>.exe` kurulum dosyasını üretir. Varsayılan FFmpeg yukarıdaki
+sabitlenmiş "essentials" derlemesidir; başka bir derleme kullanmak için klasörü ver
+(ya da `ODAK_FFMPEG_DIR` ortam değişkenini ayarla):
 
 ```powershell
 node scripts/prepare-ffmpeg.js C:\ffmpeg\bin
@@ -151,8 +158,11 @@ Kurulum dosyası olmadan, yalnızca klasör halinde denemek için `npm run pack`
 
 Notlar:
 
-- FFmpeg ikilileri (~450 MB) depoya eklenmez (`.gitignore`), yalnızca pakete girer.
-  Gyan.dev "essentials" derlemesi daha küçüktür.
+- FFmpeg ikilileri (~200 MB) depoya eklenmez (`.gitignore`), yalnızca pakete girer.
+  "essentials" derlemesi, "full" derlemenin yarısı boyutundadır ve uygulamanın kullandığı
+  tüm kodlayıcıları/filtreleri içerir.
+- Kurulum, Odak Studio'yu desteklenen video ve görsel türlerinin **Birlikte aç** listesine
+  ekler (`installer/open-with.nsh`); varsayılan uygulamalar değiştirilmez, kaldırınca silinir.
 - Kurulum dosyası imzasız olduğu için Windows SmartScreen ilk açılışta uyarı gösterebilir.
 - `nonfree` bileşen içeren FFmpeg derlemeleri yeniden dağıtılamaz; hazırlama betiği bunları reddeder.
 
@@ -237,7 +247,8 @@ Bu komut şunları doğrular:
 | `←` / `→` | Videoda kare kare ilerle; GIF'te önceki/sonraki klip |
 | `I` / `O` | Videoda giriş / çıkış noktasını oynatma konumuna koy |
 | `B` | Seçili aralığı bölüm olarak ekle |
-| `Ctrl+Z` | Fotoğrafta geri al |
+| `Ctrl+Z` | Geri al (video ve fotoğraf) |
+| `Ctrl+Y` | Videoda yinele |
 | `Esc` | Kırpmayı iptal et / GIF önizlemesini kapat / toplu işlemi durdur |
 | `F1` | Yardım |
 

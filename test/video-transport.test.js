@@ -49,6 +49,7 @@ function makeEditor({ currentTime = 0, inPoint = 0, outPoint = 10, paused = true
     currentTime,
     meta: { fps: 25 },
   };
+  editor.history = { undo: [], redo: [], lastKind: null, lastAt: 0 };
   editor.updateTimeUI = () => {};
   editor.syncPlayButton = () => {};
   return { editor, video };
@@ -117,6 +118,41 @@ test('giriş noktası çıkışı geçince çıkış sona taşınır', () => {
   editor.markOut();
   assert.equal(editor.state.inPoint, 0);
   assert.equal(editor.state.outPoint, 2);
+});
+
+test('geri al / yinele kesim değişikliklerini geri getirir', () => {
+  const { editor } = makeEditor({ currentTime: 6, inPoint: 1, outPoint: 3 });
+  editor.state.segments = [];
+  editor.renderTrim = () => {};
+  editor.renderSummary = () => {};
+  editor.renderOutput = () => {};
+  let layers = [];
+  editor.textEditor = { setLayers(value) { layers = value; }, getLayers() { return layers; } };
+  editor.cancelCrop = () => {};
+  editor.ensureEditsQuality = () => {};
+  editor.render = () => {};
+  editor.renderSubtitles = () => {};
+  editor.markIn();
+  editor.state.currentTime = 8;
+  editor.markOut();
+  assert.equal(editor.state.outPoint, 8);
+  editor.undo();
+  assert.equal(editor.state.inPoint, 6);
+  assert.equal(editor.state.outPoint, 10);
+  editor.undo();
+  assert.equal(editor.state.inPoint, 1);
+  assert.equal(editor.state.outPoint, 3);
+  editor.undo(); // geçmiş boşken bir şey değişmez
+  assert.equal(editor.state.inPoint, 1);
+  editor.redo();
+  editor.redo();
+  assert.equal(editor.state.inPoint, 6);
+  assert.equal(editor.state.outPoint, 8);
+  // Yeni bir değişiklik yinelenecekleri siler
+  editor.undo();
+  editor.state.currentTime = 9;
+  editor.markOut();
+  assert.equal(editor.history.redo.length, 0);
 });
 
 test('bölümler sıralanır ve örtüşenler birleşir', () => {

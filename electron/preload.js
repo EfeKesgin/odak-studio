@@ -42,6 +42,11 @@ contextBridge.exposeInMainWorld('odak', {
   openPath: (file) => invoke('shell:open-path', file),
   about: () => invoke('app:about'),
   reload: () => invoke('app:reload'),
+  writeLog: (entry) => invoke('log:write', entry),
+  openLog: () => invoke('log:open'),
+  showLog: () => invoke('log:show'),
+  openLicenses: () => invoke('app:open-licenses'),
+  openWebsite: () => invoke('app:open-website'),
   updateStatus: () => invoke('update:status'),
   checkForUpdates: () => invoke('update:check'),
   installUpdate: () => invoke('update:install'),
@@ -49,6 +54,12 @@ contextBridge.exposeInMainWorld('odak', {
     const listener = (event, data) => callback(data);
     ipcRenderer.on('update:status', listener);
     return () => ipcRenderer.removeListener('update:status', listener);
+  },
+  takeOpenFile: () => invoke('app:take-open-file'),
+  onOpenFile: (callback) => {
+    const listener = (event, file) => callback(file);
+    ipcRenderer.on('app:open-file', listener);
+    return () => ipcRenderer.removeListener('app:open-file', listener);
   },
   getPathForFile: (file) => webUtils.getPathForFile(file),
   onJobProgress: (callback) => {

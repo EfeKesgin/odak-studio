@@ -38,13 +38,35 @@ const {
   sanitizeBaseName,
   uniquePath,
 } = require('./util');
+const { MEDIA_EXTENSION } = require('../src/shared.js');
 // Ana süreçte yalnızca işletim sistemi pencerelerinin (dosya seçici)
 // metinleri çevrilir; hata mesajları arayüzde çevrilir.
 const { t, setLanguage, languageForLocale } = require('../src/i18n.js');
 
+const log = require('./logger');
+
 function applyLanguage() {
   setLanguage(config.preferences?.ui?.language || languageForLocale(app.getLocale()));
 }
+
+// Her IPC işleyicisi sarılır: fırlatılan hatalar ve { ok: false } sonuçları
+// (FFmpeg ayrıntısıyla) hata kaydına yazılır. İptaller hata sayılmaz.
+const registerHandler = ipcMain.handle.bind(ipcMain);
+ipcMain.handle = (channel, handler) => registerHandler(channel, async (...args) => {
+  try {
+    const result = await handler(...args);
+    if (result && result.ok === false && !result.canceled) {
+      log.error(`${channel}: ${result.message || 'failed'}`, result.details);
+    }
+    return result;
+  } catch (error) {
+    log.error(`${channel}: ${error?.message || error}`, error?.details || error?.stack);
+    throw error;
+  }
+});
+
+process.on('uncaughtException', (error) => log.error(`Uncaught exception: ${error?.message || error}`, error?.stack));
+process.on('unhandledRejection', (error) => log.error(`Unhandled rejection: ${error?.message || error}`, error?.stack));
 
 const isDev = process.argv.includes('--dev');
 const IMAGE_MIME = {
@@ -119,14 +141,36 @@ function isProducedOutput(file) {
   return Boolean(file) && producedOutputs.has(outputKey(file)) && fs.existsSync(file);
 }
 
+// "Birlikte aç" / dosyayı simgeye bırakma: Windows dosya yolunu komut satırı
+// argümanı olarak verir. Yalnızca var olan ve desteklenen bir medya dosyası
+// kabul edilir; seçenekler (--dev gibi) ve proje klasörü yok sayılır.
+function mediaFileFromArgs(argv) {
+  for (const arg of argv.slice(1)) {
+    if (!arg || arg.startsWith('-') || !MEDIA_EXTENSION.test(arg)) continue;
+    try {
+      const file = path.resolve(arg);
+      if (fs.statSync(file).isFile()) return file;
+    } catch {
+      // Var olmayan yol: sonraki argümana bak.
+    }
+  }
+  return null;
+}
+
+let pendingOpenFile = mediaFileFromArgs(process.argv);
+
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) app.quit();
 
-app.on('second-instance', () => {
+app.on('second-instance', (event, argv) => {
   if (!hasSingleInstanceLock) return;
+  const file = mediaFileFromArgs(argv);
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
+    if (file) mainWindow.webContents.send('app:open-file', file);
+  } else if (file) {
+    pendingOpenFile = file;
   }
 });
 
@@ -925,6 +969,49 @@ ipcMain.handle('update:install', async () => {
   return true;
 });
 
+// Arayüzdeki hatalar (JavaScript hataları, hata bildirimleri) da aynı kayda yazılır.
+ipcMain.handle('log:write', async (event, entry = {}) => {
+  const level = ['info', 'warn', 'error'].includes(entry.level) ? entry.level : 'error';
+  log[level](`renderer: ${String(entry.message || '').slice(0, 1000)}`, entry.details ? String(entry.details) : undefined);
+  return true;
+});
+
+ipcMain.handle('log:open', async () => {
+  if (!log.file) return false;
+  if (!fs.existsSync(log.file)) log.info('Log opened (no entries yet).');
+  return !(await shell.openPath(log.file));
+});
+
+ipcMain.handle('log:show', async () => {
+  if (!log.file) return false;
+  if (!fs.existsSync(log.file)) log.info('Log opened (no entries yet).');
+  shell.showItemInFolder(log.file);
+  return true;
+});
+
+// Lisans metinleri: paketlenmiş uygulamada resources/licenses (Odak Studio
+// GPL metni, FFmpeg lisansı ve kaynak bilgisi), geliştirmede proje LICENSE dosyası.
+ipcMain.handle('app:open-licenses', async () => {
+  const target = app.isPackaged
+    ? path.join(process.resourcesPath, 'licenses')
+    : path.join(__dirname, '..', 'LICENSE');
+  if (!fs.existsSync(target)) return false;
+  return !(await shell.openPath(target));
+});
+
+// Yalnızca projenin sabit adresi açılır; arayüzden gelen bir adres değil.
+// Arayüz hazır olunca açılışta verilen dosyayı bir kez alır.
+ipcMain.handle('app:take-open-file', async () => {
+  const file = pendingOpenFile;
+  pendingOpenFile = null;
+  return file;
+});
+
+ipcMain.handle('app:open-website', async () => {
+  await shell.openExternal('https://github.com/EfeKesgin/odak-studio');
+  return true;
+});
+
 // Dil değişikliğinde arayüzü yeniden kurar. will-navigate engeli renderer'ın
 // kendi başlattığı yeniden yüklemeyi de durdurduğu için ana süreç yapar.
 ipcMain.handle('app:reload', async (event) => {
@@ -946,9 +1033,15 @@ app.whenReady().then(async () => {
   fs.mkdirSync(baseTemp, { recursive: true });
   cleanupStaleSessions(baseTemp);
   sessionDir = await fsp.mkdtemp(path.join(baseTemp, 'run-'));
+  log.init(path.join(app.getPath('userData'), 'logs'));
+  log.info(`Odak Studio ${app.getVersion()} started`, `Electron ${process.versions.electron} · ${process.platform} ${process.getSystemVersion?.() || ''} · ${app.isPackaged ? 'packaged' : 'development'}`);
   loadConfig();
   applyLanguage();
   engine = await detectEngine();
+  if (engine.available) log.info(`FFmpeg ${engine.version}`, engine.ffmpeg);
+  else log.warn('FFmpeg not found.');
+  app.on('render-process-gone', (event, contents, details) => log.error(`Renderer process gone: ${details.reason}`, details));
+  app.on('child-process-gone', (event, details) => log.error(`Child process gone: ${details.type} ${details.reason}`));
   await startMediaServer();
   createWindow();
   hardwarePromise = detectHardwareEncoders(engine).catch(() => ({ h264: [], h265: [] }));

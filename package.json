@@ -86,7 +86,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Odak Studio",
-      "artifactName": "OdakStudio-Setup-${version}.${ext}"
+      "artifactName": "OdakStudio-Setup-${version}.${ext}",
+      "include": "installer/open-with.nsh"
     }
   },
   "devDependencies": {
