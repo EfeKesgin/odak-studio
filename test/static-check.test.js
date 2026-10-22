@@ -61,7 +61,7 @@ ok(`getElementById referanslari (${idRefs} adet)`);
 
 // 5) UTF-8 gecerliligi
 const files = [
-  'package.json', 'README.md', '.gitignore', 'scripts/prepare-ffmpeg.js',
+  'package.json', 'README.md', '.gitignore', 'scripts/prepare-ffmpeg.js', 'scripts/publish-release.js',
   'electron/main.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
   'src/index.html', 'src/styles.css', 'src/ui.js', 'src/crop.js', 'src/text-layers.js', 'src/video.js', 'src/photo.js', 'src/gif.js',
   'src/i18n.js', 'src/shared.js', 'src/batch-plan.js', 'src/batch.js', 'src/app.js',

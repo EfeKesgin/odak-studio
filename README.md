@@ -106,17 +106,16 @@ yoksa uygulama normal çalışır; güncelleme zorunlu değildir. Durum Yardım 
 
 Yeni sürüm yayınlamak için:
 
-1. `package.json` içindeki `version` değerini artır (ör. `1.0.1`).
-2. GitHub token'ını ver ve yayınla:
+1. `package.json` içindeki `version` değerini artır (ör. `1.0.1`), commit'le ve gönder.
+2. Yayınla (GitHub CLI ile oturum açık olmalı: `gh auth login`):
 
 ```powershell
-$env:GH_TOKEN = gh auth token
 npm run release
 ```
 
-Bu komut testleri çalıştırır, kurulum dosyasını derler ve `latest.yml` + `.blockmap` ile birlikte
-GitHub'da yeni bir sürüm (release) olarak yayınlar. Kurulu uygulamalar bir sonraki açılışta
-güncellemeyi bulur.
+Bu komut testleri çalıştırır, kurulum dosyasını derler, `latest.yml`'nin bu derlemeye ait
+olduğunu doğrular ve kurulum dosyası + `.blockmap` + `latest.yml` ile GitHub'da yeni bir sürüm
+(release) oluşturur. Kurulu uygulamalar bir sonraki açılışta güncellemeyi bulur.
 
 ## Testler
 

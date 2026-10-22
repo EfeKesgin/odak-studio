@@ -18,7 +18,7 @@
     "ffmpeg": "node scripts/prepare-ffmpeg.js",
     "pack": "npm run ffmpeg && electron-builder --win dir",
     "dist": "npm run ffmpeg && electron-builder --win nsis",
-    "release": "npm test && npm run ffmpeg && electron-builder --win nsis --publish always"
+    "release": "npm test && npm run dist && node scripts/publish-release.js"
   },
   "build": {
     "appId": "com.odak.studio",
