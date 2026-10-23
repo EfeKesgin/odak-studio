@@ -23,7 +23,7 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
 
 | | |
 | --- | --- |
-| **Video** | Kayıpsız kesim (yeniden kodlama yok), çok bölümlü kesim, kırpma, döndürme, boyutlandırma, hız. H.264 / H.265 / VP9 / ProRes. |
+| **Video** | Kolay kesim: oynat, "Başlangıç burası" / "Bitiş burası" de, dışa aktar. Tam kesim ya da hızlı kayıpsız kesim; çok bölümlü kesim, kırpma, döndürme, boyutlandırma, hız. H.264 / H.265 / VP9 / ProRes. |
 | **Hedef boyut** | "Bu video 10 MB olsun" de, gerisini o halletsin: Discord, WhatsApp, e-posta için hazır ayarlar. |
 | **Metin ve altyazı** | Videoya, fotoğrafa ve GIF'e yazı veya filigran; altyazıyı videoya yakma. |
 | **Hız** | NVIDIA, Intel ve AMD ekran kartlarıyla birkaç kat daha hızlı kodlama (varsa). |
@@ -89,7 +89,8 @@ Aşağıdaki bölümler projeyi kaynaktan çalıştırmak, paketlemek ve katkıd
   ile yeniden kodlama yapılmaz. Yeniden kodlama gerekliyse varsayılan CRF 16 kullanılır. Ek ses
   dilleri ve altyazı izleri çıktıya taşınır.
 - **Hedef dosya boyutu:** İki geçişli kodlama; çıktı hedefi aşarsa bir kez daha düşük bit hızıyla
-  düzeltilir. GPU'da kodlayıcının kendi çok geçişli modu kullanılır.
+  düzeltilir. Hedef bir üst sınırdır: kısa veya zaten küçük videolar şişirilmez (bit hızı kaynağı
+  aşmaz). GPU'da kodlayıcının kendi çok geçişli modu kullanılır.
 - **Çok bölümlü kesim:** `I` / `O` ile giriş/çıkış noktası, `B` ile seçimi bölüm olarak ekleme.
   Kopya modunda bölümler ayrı kesilip concat ile, yeniden kodlamada tek filtre grafiğinde birleşir.
 - **Metin katmanları:** Video ve GIF'te libass (ASS), fotoğrafta SVG ile çizilir; önizleme ile
@@ -213,9 +214,9 @@ Bu komut şunları doğrular:
 
 ### Kalite notları
 
-- **Kopya modunda kesim** anahtar kareye hizalanır; başlangıç/bitiş genelde 1–2 sn (bazen
-  daha fazla) kayabilir. Bu, görüntünün yeniden kodlanmaması için bilinçli bir tercihtir.
-  Kare hassasiyeti gerekiyorsa CRF modunu seç.
+- **Hızlı · kayıpsız kesim** anahtar kareye hizalanır; başlangıç genelde 1–2 sn (bazen daha
+  fazla) erken olabilir. Bu, görüntünün yeniden kodlanmaması için bilinçli bir tercihtir.
+  Kare hassasiyeti gerekiyorsa kesim türünü **Tam kesim** yap.
 - **10-bit / HDR kaynaklar** için H.265 (veya VP9) önerilir. H.264 10-bit çıktısı her oynatıcıda
   desteklenmeyebilir.
 - **ProRes** seçildiğinde ses, çoğu durumda PCM olarak yazılır; kapsayıcı MOV olur.

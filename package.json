@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "description": "Kalite kaybı olmadan video ve fotoğraf düzenleme stüdyosu",
   "main": "electron/main.js",
-  "author": "Odak",
+  "author": {
+    "name": "Efe Kesgin",
+    "url": "https://github.com/EfeKesgin"
+  },
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -23,7 +26,7 @@
   "build": {
     "appId": "com.odak.studio",
     "productName": "Odak Studio",
-    "copyright": "Copyright © 2026 Odak · GPL-3.0-or-later",
+    "copyright": "Copyright © 2026 Efe Kesgin · TörüYazılım · GPL-3.0-or-later",
     "directories": {
       "output": "dist"
     },
@@ -47,6 +50,11 @@
       "node_modules/@img/**/*"
     ],
     "npmRebuild": false,
+    "electronLanguages": [
+      "tr",
+      "en-US"
+    ],
+    "compression": "maximum",
     "extraResources": [
       {
         "from": "bin",

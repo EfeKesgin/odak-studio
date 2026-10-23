@@ -9,6 +9,7 @@ const i18n = require('../src/i18n.js');
 
 const root = path.join(__dirname, '..');
 const TURKISH_LETTERS = /[çğıöşüÇĞİÖŞÜ]/;
+// Marka adı (TörüYazılım) her dilde aynı yazılır.
 let problems = 0;
 const fail = (message) => { problems += 1; console.log(`FAIL  ${message}`); };
 
@@ -16,7 +17,7 @@ i18n.setLanguage('en');
 
 function check(text, where) {
   const result = i18n.translate(text);
-  if (result === text || TURKISH_LETTERS.test(result.replace(/<[^>]+>/g, ''))) {
+  if (result === text || TURKISH_LETTERS.test(result.replace(/<[^>]+>/g, '').replace(/TörüYazılım/g, ''))) {
     fail(`${where}: çevirisi yok → "${text}"${result !== text ? ` (çıktı: "${result}")` : ''}`);
   }
 }

@@ -161,7 +161,7 @@
     'Bir sorun bildirirken bu dosyayı paylaşabilirsin': 'You can share this file when reporting a problem',
     'Lisanslar': 'Licenses',
     'GitHub sayfası': 'GitHub page',
-    'Odak Studio açık kaynaklı, ücretsiz bir yazılımdır (GPL-3.0). Hata kaydı yalnızca bu bilgisayarda tutulur.': 'Odak Studio is free, open-source software (GPL-3.0). The error log stays on this computer.',
+    "Odak Studio, TörüYazılım'ın açık kaynaklı ve ücretsiz bir yazılımıdır (GPL-3.0). Hata kaydı yalnızca bu bilgisayarda tutulur.": 'Odak Studio is free, open-source software by TörüYazılım (GPL-3.0). The error log stays on this computer.',
     'Güncellemeleri denetle': 'Check for updates',
     'Yeniden başlat ve güncelle': 'Restart and update',
     'Şimdi yeniden başlat': 'Restart now',
