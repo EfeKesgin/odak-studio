@@ -421,8 +421,12 @@
       const files = Array.isArray(paths) ? paths.filter(Boolean) : [];
       if (!files.length || this.adding) return;
       this.adding = true;
-      const existing = new Set(this.kindQueue.map((item) => String(item.path || '').toLowerCase()));
+      const existingIn = (kind) => new Set(this.queues[kind].map((item) => String(item.path || '').toLowerCase()));
+      const existing = existingIn(this.kind);
       const added = [];
+      // Bu sekmeye uymayan dosya (ör. video sekmesinde fotoğraf) reddedilmez,
+      // kendi sekmesinin kuyruğuna gider.
+      const moved = { video: [], photo: [] };
       const errors = [];
       let duplicates = 0;
 
@@ -441,11 +445,6 @@
             errors.push(`${this.baseName(file)}: ${error.message || 'Dosya okunamadı.'}`);
             continue;
           }
-          if (!this.accepts(meta)) {
-            const expected = this.kind === 'video' || this.kind === 'merge' ? 'video' : this.kind === 'photo' ? 'fotoğraf' : 'video veya fotoğraf';
-            errors.push(`${meta.name || this.baseName(file)}: bu sekme için ${expected} gerekli.`);
-            continue;
-          }
           const item = {
             id: `batch-${++this.seq}`,
             path: meta.path || file,
@@ -457,6 +456,20 @@
             details: '',
             output: null,
           };
+          if (!this.accepts(meta)) {
+            const target = meta.kind === 'video' ? 'video' : meta.kind === 'image' ? 'photo' : null;
+            if (!target) {
+              errors.push(`${item.name}: desteklenmeyen dosya türü.`);
+              continue;
+            }
+            if (existingIn(target).has(key)) {
+              duplicates += 1;
+              continue;
+            }
+            this.queues[target].push(item);
+            moved[target].push(item);
+            continue;
+          }
           this.kindQueue.push(item);
           existing.add(key);
           added.push(item);
@@ -465,6 +478,23 @@
         this.adding = false;
       }
 
+      const movedKinds = Object.keys(moved).filter((kind) => moved[kind].length);
+      if (movedKinds.length) {
+        for (const kind of movedKinds) {
+          const label = kind === 'video' ? 'Video' : 'Fotoğraf';
+          const list = moved[kind];
+          toast(list.length === 1
+            ? `${list[0].name} ${label} kuyruğuna eklendi.`
+            : `${list.length} dosya ${label} kuyruğuna eklendi.`, { type: 'success' });
+        }
+        // Bu sekmeye hiçbir şey eklenmediyse dosyaların gittiği sekmeye geç.
+        if (!added.length && movedKinds.length === 1) {
+          this.kind = movedKinds[0];
+          this.rememberSettings();
+        }
+        this.render();
+        this.onChange?.();
+      }
       if (added.length) {
         this.render();
         this.els.list.scrollTop = this.els.list.scrollHeight;
@@ -484,7 +514,7 @@
           : `${errors.length} dosya eklenemedi. ${errors[0]}`;
         toast(text, { type: 'warn', timeout: 7000 });
       }
-      if (!added.length && !errors.length && !duplicates) {
+      if (!added.length && !movedKinds.length && !errors.length && !duplicates) {
         this.onChange?.();
       }
     }

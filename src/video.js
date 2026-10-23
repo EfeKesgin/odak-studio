@@ -1352,7 +1352,9 @@
       if (remembered.crf) this.state.crf = remembered.crf;
       if (remembered.preset) this.state.preset = remembered.preset;
       if (remembered.targetMB) this.state.targetMB = remembered.targetMB;
-      if (remembered.quality) this.state.quality = remembered.quality;
+      // Hedef boyut ve bit hızı o videoya özgü seçimlerdir; yeni videoya
+      // taşınmaz, yalnızca kayıpsız / CRF tercihi hatırlanır.
+      if (remembered.quality === 'copy' || remembered.quality === 'crf') this.state.quality = remembered.quality;
     }
 
     renderPresetSelect() {
@@ -1502,6 +1504,7 @@
         duration: this.getOutputDuration(),
         codec: this.state.codec,
         audioTracks,
+        sourceVideoKbps: ((Number(meta?.videoBitrate) || 0) / 1000) * Math.max(0.25, this.state.speed),
       });
     }
 
@@ -1519,7 +1522,7 @@
         ? 'Ekran kartının çok geçişli modunda kodlanır'
         : 'İki geçişte kodlanır';
       this.els.sizeHint.textContent = rates.feasible
-        ? `Video ~${window.OdakUI.formatNumber(rates.videoKbps)} kbps${audioPart}. ${passes}; çıktı hedefin altında kalır.`
+        ? `Video ~${window.OdakUI.formatNumber(rates.videoKbps)} kbps${audioPart}. ${passes}; çıktı hedefin altında kalır.${rates.capped ? ' Kaynak bu hedeften küçük olduğu için bit hızı artırılmaz.' : ''}`
         : `${passes}; çıktı hedefin altında kalır.`;
       let warning = '';
       if (!rates.feasible) {

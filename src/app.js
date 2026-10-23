@@ -965,6 +965,7 @@
     els.cancelExportBtn.disabled = true;
     els.exportBar.classList.remove('indeterminate');
     setExportStep('error');
+    if (canceled) setExportEyebrow('İPTAL EDİLDİ');
     els.exportErrorTitle.textContent = canceled ? 'İşlem iptal edildi' : 'Dışa aktarma tamamlanamadı';
     els.exportErrorMessage.textContent = canceled
       ? 'Dışa aktarma iptal edildi; yarım kalan dosya temizlendi.'
@@ -975,7 +976,12 @@
     els.exportErrorDetails.classList.toggle('hidden', !details);
   }
 
+  // Bitince başlık "hazırlanıyor" demeye devam etmesin: üst başlık yalnızca
+  // işlem sürerken görünür, sonuçta altındaki başlık tek başına kalır.
   function setExportStep(step) {
+    els.exportTitle.hidden = step !== 'running';
+    if (step === 'done') setExportEyebrow('TAMAMLANDI');
+    else if (step === 'error') setExportEyebrow(appState.exportCanceling ? 'İPTAL EDİLDİ' : 'HATA');
     els.exportRunning.hidden = step !== 'running';
     els.exportDone.hidden = step !== 'done';
     els.exportError.hidden = step !== 'error';

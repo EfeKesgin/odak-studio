@@ -739,6 +739,7 @@ function planSizeMode(meta, options, plan) {
     duration: plan.duration,
     codec,
     audioTracks: sizeAudioTrackCount(meta, options),
+    sourceVideoKbps: ((Number(meta.videoBitrate) || 0) / 1000) * clamp(Number(options.speed) || 1, 0.25, 4),
   });
   if (!(rates.targetBytes > 0)) throw new Error('Geçerli bir hedef dosya boyutu girin.');
   if (!rates.feasible) {

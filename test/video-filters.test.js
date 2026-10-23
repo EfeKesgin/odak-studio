@@ -231,6 +231,13 @@ assert.ok(tiny.minMB > 0.05);
 // Iki ses izi varsa butceden ikisi de duser
 const twoTracks = shared.sizeModeBitrates({ targetMB: 10, duration: 60, audioTracks: 2 });
 assert.strictEqual(twoTracks.videoKbps, rates.videoKbps - 128);
+// Hedef ust sinirdir: kisa ve dusuk bit hizli kaynak sisirilmez
+const shortClip = shared.sizeModeBitrates({ targetMB: 9.5, duration: 4, audioTracks: 1, sourceVideoKbps: 3100 });
+assert.strictEqual(shortClip.videoKbps, 3100);
+assert.ok(shortClip.capped && shortClip.feasible);
+const longClip = shared.sizeModeBitrates({ targetMB: 10, duration: 60, audioTracks: 1, sourceVideoKbps: 20000 });
+assert.strictEqual(longClip.videoKbps, rates.videoKbps);
+assert.strictEqual(longClip.capped, false);
 
 const sizeOptions = { mode: 'size', codec: 'h264', audioMode: 'original', speed: 1, targetMB: 10, trimStart: 0, trimEnd: 20 };
 const sizePlan = media.planVideo(meta8, sizeOptions);

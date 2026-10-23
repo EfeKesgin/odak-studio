@@ -2857,10 +2857,12 @@ kbd {
 }
 
 /* Toasts */
+/* Üst ortada: sağ alttaki Dışa aktar düğmesini ve sağ üstteki Dosya aç'ı kapatmaz. */
 .toast-stack {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 120;
   display: flex;
   flex-direction: column;
@@ -2884,7 +2886,7 @@ kbd {
 }
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
   to { opacity: 1; transform: none; }
 }
 
@@ -2893,7 +2895,7 @@ kbd {
 }
 
 @keyframes toastOut {
-  to { opacity: 0; transform: translateY(4px); }
+  to { opacity: 0; transform: translateY(-4px); }
 }
 
 .toast-dot {
