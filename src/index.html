@@ -293,8 +293,8 @@
                   <div class="trim-length"><span>Seçilen süre</span><b id="trimLength">—</b></div>
                   <div class="field-label">Kesim türü</div>
                   <div class="segmented" id="trimModeSwitch">
-                    <button data-trim-mode="exact">Tam kesim</button>
-                    <button data-trim-mode="fast">Hızlı · kayıpsız</button>
+                    <button data-trim-mode="fast">Kayıpsız</button>
+                    <button data-trim-mode="exact">Yeniden kodla</button>
                   </div>
                   <p class="hint" id="trimHint">Başlangıç ve bitiş tam seçtiğin yerde olur.</p>
                   <details class="trim-more" id="videoSegmentDetails">
@@ -1253,7 +1253,7 @@
       </div>
       <div class="help-section">
         <h3>Kalite notları</h3>
-        <p>Kayıpsız kesimde FFmpeg akışı kopyalar; video yeniden kodlanmaz. Kırpma, döndürme veya hız değişikliği zorunlu olarak yeniden kodlama gerektirir. Bu durumda CRF 16 veya kaynak bit hızı ile çalışabilirsin.</p>
+        <p>Kayıpsız kesimde görüntü olduğu gibi kopyalanır. H.264 ve VP9 videolarda kesim tam seçtiğin karede olur: yalnızca kesim noktasından ilk anahtar kareye kadarki kısa bölüm yüksek kalitede yeniden kodlanır (akıllı kesim). Kırpma, döndürme veya hız değişikliği yeniden kodlama gerektirir; bu durumda CRF 16 veya kaynak bit hızı ile çalışabilirsin.</p>
         <p>JPEG her kayıtta yeniden kodlanır; fotoğrafta gerçek kayıpsızlık için PNG veya WebP seç. Hiç düzenleme yapmadıysan “Orijinal format” dosyayı birebir kopyalar.</p>
         <p>GIF stüdyosu sesi atar ve 256 renk paleti kullanır. Uzun veya yüksek çözünürlüklü GIF'ler büyük dosyalar üretebilir; 60 saniye / 900 kare sınırı vardır.</p>
       </div>

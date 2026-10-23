@@ -80,6 +80,32 @@
     return 64;
   }
 
+  // Akıllı kesim: kesim noktasından ilk anahtar kareye kadarki kısa bölüm
+  // kaynağa uygun ayarlarla yeniden kodlanır, gerisi olduğu gibi kopyalanır.
+  // HEVC'nin MP4'teki "hvc1" etiketi parametre setlerinin akış içinde
+  // değişmesine izin vermediği için yalnızca H.264 ve VP9 desteklenir.
+  const SMART_CUT_CODECS = ['h264', 'vp9'];
+  const SMART_CUT_PIX_FMTS = ['yuv420p', 'yuvj420p', 'yuv420p10le'];
+
+  function smartCutSupported(meta) {
+    if (!meta) return false;
+    return SMART_CUT_CODECS.includes(String(meta.videoCodec || '').toLowerCase()) &&
+      SMART_CUT_PIX_FMTS.includes(String(meta.pixFmt || '').toLowerCase());
+  }
+
+  // Kesim türü: hem arayüz hem ana süreç aynı kuralı kullanır.
+  // Başlangıçtaki anahtar kare: başlangıca yarım kareden yakın olan ilk kare.
+  function smartCutSplit(keyframes, start, end, frameDuration = 1 / 30) {
+    const half = Math.max(0.001, frameDuration / 2);
+    const key = (Array.isArray(keyframes) ? keyframes : [])
+      .filter((time) => Number.isFinite(time))
+      .sort((a, b) => a - b)
+      .find((time) => time >= start - half);
+    if (key === undefined || key >= end - half) return { head: [start, end], tail: null };
+    if (key <= start + half) return { head: null, tail: [key, end] };
+    return { head: [start, key], tail: [key, end] };
+  }
+
   // Kesim kutularına yazılan zaman: "1:05.5", "01:02:03,25", "65" veya
   // "65,5". Saniyeye çevrilir; anlaşılmazsa NaN döner.
   function parseTimecode(value) {
@@ -380,6 +406,9 @@
     SIZE_MAX_MB,
     sizeModeBitrates,
     parseTimecode,
+    SMART_CUT_CODECS,
+    smartCutSupported,
+    smartCutSplit,
     VIDEO_EXTENSIONS,
     IMAGE_EXTENSIONS,
     AUDIO_EXTENSIONS,

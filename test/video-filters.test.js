@@ -424,6 +424,23 @@ assert.ok(!media.sizeFitsAsCopy(fitMeta, { ...fitOptions, rotation: 90 }, media.
 const audioCopyArgs = media.buildVideoArgs('in.mkv', meta8, { ...fitOptions, mode: 'copy' }, 'out.mp4', media.planVideo(fitMeta, { ...fitOptions, mode: 'copy' })).args;
 assert.ok(audioCopyArgs.includes('-copyinkf:a'));
 
+// s) Akilli kesim: bas (kodlanir) + kuyruk (kopyalanir)
+assert.deepStrictEqual(shared.smartCutSplit([0, 0.5, 3.333], 2.2, 9, 1 / 60), { head: [2.2, 3.333], tail: [3.333, 9] });
+assert.deepStrictEqual(shared.smartCutSplit([0, 2.2], 2.2, 9), { head: null, tail: [2.2, 9] });
+assert.deepStrictEqual(shared.smartCutSplit([0], 2.2, 9), { head: [2.2, 9], tail: null });
+assert.ok(shared.smartCutSupported({ videoCodec: 'h264', pixFmt: 'yuv420p' }));
+assert.ok(shared.smartCutSupported({ videoCodec: 'vp9', pixFmt: 'yuv420p' }));
+assert.ok(!shared.smartCutSupported({ videoCodec: 'hevc', pixFmt: 'yuv420p' }), 'hvc1 parametre degisimine izin vermez');
+assert.ok(!shared.smartCutSupported({ videoCodec: 'h264', pixFmt: 'yuv444p' }));
+const smartMeta = { ...meta8, videoCodec: 'h264', pixFmt: 'yuv420p', profile: 'Main', level: 31 };
+const headArgs = media.smartHeadEncoderArgs(smartMeta);
+assert.ok(has(headArgs, '-c:v', 'libx264') && has(headArgs, '-profile:v', 'main') && has(headArgs, '-level:v', '3.1'));
+assert.ok(has(media.smartHeadEncoderArgs({ ...smartMeta, pixFmt: 'yuvj420p' }), '-color_range', 'pc'));
+const trimCopy = { mode: 'copy', speed: 1, audioMode: 'original', trimStart: 2, trimEnd: 6 };
+assert.ok(media.wantsSmartCut(smartMeta, trimCopy, media.planVideo(smartMeta, trimCopy)));
+assert.ok(!media.wantsSmartCut(smartMeta, { ...trimCopy, trimStart: 0 }, media.planVideo(smartMeta, { ...trimCopy, trimStart: 0 })), 'bastan kesimde gerek yok');
+assert.ok(!media.wantsSmartCut({ ...smartMeta, videoCodec: 'hevc' }, trimCopy, media.planVideo(smartMeta, trimCopy)));
+
 // r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
 assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);
 assert.strictEqual(shared.parseTimecode('01:02:03,25'), 3723.25);

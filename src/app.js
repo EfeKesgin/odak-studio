@@ -962,7 +962,8 @@
     if (wasGif && result.frames) meta.push(`${result.frames} kare`);
     if (result.bitrate) meta.push(formatBitrate(result.bitrate));
     if (result.elapsedMs) meta.push(`${(result.elapsedMs / 1000).toFixed(1)} sn`);
-    if (result.copied) meta.push(wasPhoto ? 'Birebir kopya' : 'Video kopyası');
+    if (result.smartCut) meta.push('Akıllı kesim');
+    else if (result.copied) meta.push(wasPhoto ? 'Birebir kopya' : 'Video kopyası');
     for (const text of meta) {
       const span = document.createElement('span');
       span.textContent = text;

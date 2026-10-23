@@ -177,6 +177,7 @@ async function probeVideo(engine, file) {
     duration,
     fps,
     videoCodec: video.codec_name || '',
+    timeBase: video.time_base || '',
     videoCodecLong: video.codec_long_name || '',
     profile: video.profile || '',
     level: video.level || null,
@@ -1098,6 +1099,19 @@ async function exportVideo(engine, sourcePath, meta, options, tempPath, plan, { 
     ? null
     : await prepareOverlays(engine, input, meta, options, geometryOutputSize(meta, options));
   try {
+    if (wantsSmartCut(meta, options, plan)) {
+      try {
+        const result = await exportSmartCopy(engine, input, meta, options, output, plan, { onProgress, signal });
+        const videoDuration = await videoStreamDuration(engine, output).catch(() => 0);
+        // Görüntü süresi beklenenden belirgin farklıysa güvenli yola (anahtar
+        // kare kopyası) dönülür; dosya süresine bakılmaz, ses daha uzun olabilir.
+        const tolerance = Math.max(0.3, 3 / Math.max(1, Number(meta.fps) || 30));
+        if (Math.abs(videoDuration - plan.duration) <= tolerance) return result;
+      } catch (error) {
+        if (error.cancelled || signal?.aborted) throw error;
+      }
+      await fsp.rm(output, { force: true }).catch(() => {});
+    }
     if (options.mode === 'copy' && plan.segments && plan.segments.length > 1) {
       return await exportCopySegments(engine, input, meta, options, output, plan, { onProgress, signal });
     }
@@ -1115,6 +1129,237 @@ async function exportVideo(engine, sourcePath, meta, options, tempPath, plan, { 
   } finally {
     await overlay?.cleanup();
   }
+}
+
+// ── Akıllı kesim ────────────────────────────────────────────────────────
+// Kayıpsız kesimde başlangıç bir anahtar kare değilse yalnızca başlangıçtan
+// ilk anahtar kareye kadarki kısa bölüm (genelde 1–2 sn) kaynağa uygun
+// ayarlarla yeniden kodlanır; gerisi bit bit kopyalanır. Böylece kesim hem
+// kayıpsıza yakın hem de tam seçilen karede olur.
+
+// Video akışının anahtar kareleri: yalnızca paket başlıkları okunur.
+async function videoKeyframes(engine, input, from, to) {
+  const { stdout } = await execFileAsync(engine.ffprobe, [
+    '-v', 'error', '-select_streams', 'v:0',
+    '-read_intervals', `${Math.max(0, from - 1).toFixed(3)}%${(to + 1).toFixed(3)}`,
+    '-show_entries', 'packet=pts_time,flags', '-of', 'csv=p=0', input,
+  ], { maxBuffer: 64 * 1024 * 1024 });
+  return stdout.split(/\r?\n/)
+    .filter((line) => line.includes(',K'))
+    .map((line) => Number(line.split(',')[0]))
+    .filter(Number.isFinite);
+}
+
+const H264_PROFILES = {
+  baseline: 'baseline',
+  'constrained baseline': 'baseline',
+  main: 'main',
+  high: 'high',
+  'high 10': 'high10',
+};
+
+function knownColor(value) {
+  return value && value !== 'unknown' && value !== 'reserved' ? value : null;
+}
+
+// Baştaki kısa bölümün kodlayıcısı: profil, piksel biçimi ve renk bilgisi
+// kaynakla aynı; kalite görsel olarak kayıpsız düzeyde.
+function smartHeadEncoderArgs(meta) {
+  const fullRange = meta.pixFmt === 'yuvj420p';
+  const pixFmt = fullRange ? 'yuv420p' : meta.pixFmt;
+  const color = [];
+  if (fullRange) color.push('-color_range', 'pc');
+  if (knownColor(meta.colorPrimaries)) color.push('-color_primaries', meta.colorPrimaries);
+  if (knownColor(meta.colorTransfer)) color.push('-color_trc', meta.colorTransfer);
+  if (knownColor(meta.colorSpace)) color.push('-colorspace', meta.colorSpace);
+  if (meta.videoCodec === 'vp9') {
+    return ['-c:v', 'libvpx-vp9', '-crf', '18', '-b:v', '0', '-deadline', 'good', '-cpu-used', '2', '-row-mt', '1',
+      '-pix_fmt', pixFmt, ...color];
+  }
+  const tenBit = pixFmt === 'yuv420p10le';
+  const profile = H264_PROFILES[String(meta.profile || '').toLowerCase()] || (tenBit ? 'high10' : 'high');
+  const args = ['-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-pix_fmt', pixFmt, '-profile:v', profile];
+  const level = Number(meta.level);
+  if (level >= 10 && level <= 62) args.push('-level:v', (level / 10).toFixed(1));
+  return [...args, ...color];
+}
+
+// Bir bölümün yalnızca görüntüsü: [baş (kodlanır)] + [kuyruk (kopyalanır)].
+// Parçalar iş klasörüne yazılır; dönen değer o klasördeki dosya adıdır.
+async function smartCutVideo(engine, input, meta, segment, dir, tag, container, { signal, onProgress } = {}) {
+  const frame = 1 / Math.max(1, Number(meta.fps) || 30);
+  const keys = await videoKeyframes(engine, input, segment.start, segment.end);
+  const split = shared.smartCutSplit(keys, segment.start, segment.end, frame);
+  // H.264 parçaları MPEG-TS'te tutulur: orada her anahtar kare kendi
+  // parametre setlerini (SPS/PPS) taşır. Baş ve kuyruk farklı kodlayıcılardan
+  // geldiği için oynatıcı geçişte doğru ayarlara geçer. VP9'da böyle bir
+  // sorun yok; parçalar MKV'de tutulur.
+  const ext = meta.videoCodec === 'h264' ? '.ts' : '.mkv';
+  const timescale = Number(String(meta.timeBase || '').split('/')[1]) || 0;
+  const tsArgs = (container === 'mp4' || container === 'mov') && timescale ? ['-video_track_timescale', String(timescale)] : [];
+  const inBand = meta.videoCodec === 'h264' ? ['-bsf:v', 'h264_mp4toannexb'] : [];
+  const files = [];
+  const total = Math.max(0.001, segment.end - segment.start);
+  if (split.head) {
+    const [from, to] = split.head;
+    const file = `${tag}-head${ext}`;
+    const args = ['-hide_banner', '-y', '-progress', 'pipe:1', '-nostats', '-noautorotate'];
+    if (from > 0.001) args.push('-ss', from.toFixed(6));
+    args.push('-t', (to - from).toFixed(6), '-i', input,
+      '-map', '0:v:0', '-an', '-sn', '-dn', '-map_metadata', '-1', '-fps_mode', 'passthrough',
+      ...smartHeadEncoderArgs(meta), file);
+    await runFfmpegProcess(engine, args, {
+      cwd: dir,
+      signal,
+      duration: to - from,
+      onProgress: (data) => onProgress?.(((Number(data.percent) || 0) / 100) * ((to - from) / total) * 0.9),
+    });
+    files.push(file);
+  }
+  if (split.tail) {
+    const [from, to] = split.tail;
+    const file = `${tag}-tail${ext}`;
+    const args = ['-hide_banner', '-y', '-nostats'];
+    // Anahtar karenin biraz sonrasına atlanır: kayan nokta yüzünden bir öncekine düşmesin.
+    if (from > 0.001) args.push('-ss', (from + Math.min(0.002, frame / 4)).toFixed(6));
+    args.push('-t', (to - from).toFixed(6), '-i', input,
+      '-map', '0:v:0', '-an', '-sn', '-dn', '-map_metadata', '-1', '-c:v', 'copy', ...inBand,
+      '-avoid_negative_ts', 'make_zero', file);
+    await runFfmpegProcess(engine, args, { cwd: dir, signal, duration: to - from });
+    files.push(file);
+  }
+  onProgress?.(0.95);
+  // Tek parça da olsa son kapsayıcıya aktarılır (ara parçalar TS/MKV'dir).
+  const list = `${tag}-list.txt`;
+  await fsp.writeFile(path.join(dir, list), files.map((file) => `file '${file}'`).join('\n'), 'utf8');
+  const file = `${tag}-video.${container}`;
+  await runFfmpegProcess(engine, [
+    '-hide_banner', '-y', '-nostats', '-f', 'concat', '-safe', '0', '-i', list,
+    '-map', '0:v', '-c', 'copy', ...tsArgs, file,
+  ], { cwd: dir, signal, duration: total });
+  return { file, split };
+}
+
+// Akıllı kesimle kayıpsız dışa aktarma (bir veya birden çok bölüm). Ses,
+// altyazı ve üst veri kaynaktan aynı aralıkla kopyalanır.
+async function exportSmartCopy(engine, input, meta, options, output, plan, { onProgress, signal } = {}) {
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'odak-smart-'));
+  try {
+    const container = plan.container;
+    const audio = pickAudioStrategy(meta, options, container, 1);
+    const segments = plan.segments;
+    const multi = segments.length > 1;
+    const total = plan.sourceDuration;
+    const rotation = Number(meta.rotation) || 0;
+    let done = 0;
+    const parts = [];
+    for (let index = 0; index < segments.length; index += 1) {
+      const segment = segments[index];
+      const length = segment.end - segment.start;
+      const report = (fraction) => onProgress?.({ percent: ((done + fraction * length) / total) * (multi ? 95 : 100), etaSeconds: 0 });
+      const { file: videoFile } = await smartCutVideo(engine, input, meta, segment, dir, `s${index}`, container, {
+        signal,
+        onProgress: report,
+      });
+      // Ses ayrı ve tam kesilir: girişte atlanınca kopyalanan ses, kesimden
+      // önceki ~0,5 sn'yi gizli (eksi zamanlı) taşır; parçalar birleşince bu
+      // süreye eklenip görüntüyle sesi kaydırıyordu. Çıkış tarafında atlamak
+      // o paketleri gerçekten atar; giriş yine de yakın bir noktaya atlar.
+      let audioFile = null;
+      if (audio.enabled) {
+        audioFile = `s${index}-audio.mka`;
+        const preroll = Math.max(0, segment.start - 3);
+        const audioArgs = ['-hide_banner', '-y', '-nostats'];
+        if (preroll > 0.001) audioArgs.push('-ss', preroll.toFixed(6));
+        audioArgs.push('-i', input);
+        if (segment.start - preroll > 0.001) audioArgs.push('-ss', (segment.start - preroll).toFixed(6));
+        audioArgs.push('-t', length.toFixed(6), '-map', '0:a', '-vn', '-sn', '-dn');
+        await runFfmpegProcess(engine, [...audioArgs, ...audioEncoderArgs(audio), audioFile], { cwd: dir, signal, duration: length });
+        // Ses paketleri anahtar kare diye işaretlenmemişse (bazı MKV kayıtları)
+        // çıkış tarafında atlanan kopya boş kalır: o bölümün sesi kodlanır.
+        if (audio.codec === 'copy' && !(await hasAudioPackets(engine, path.join(dir, audioFile)))) {
+          const fallback = container === 'webm' ? { codec: 'libopus', bitrate: '256k' } : { codec: 'aac', bitrate: '320k' };
+          await runFfmpegProcess(engine, [...audioArgs, ...audioEncoderArgs({ enabled: true, ...fallback }), audioFile], {
+            cwd: dir, signal, duration: length,
+          });
+        }
+      }
+      const target = multi ? `part${index}${plan.ext}` : output;
+      const args = ['-hide_banner', '-y', '-nostats'];
+      // Baştaki bölüm döndürülmeden kodlandı; döndürme bilgisi çıktıya yeniden yazılır.
+      if (rotation) args.push('-display_rotation:v:0', String(rotation));
+      args.push('-i', videoFile);
+      if (audioFile) args.push('-i', audioFile);
+      const sourceIndex = audioFile ? 2 : 1;
+      if (segment.start > 0.001) args.push('-ss', segment.start.toFixed(6));
+      args.push('-t', length.toFixed(6), '-i', input, '-map', '0:v:0');
+      if (audioFile) args.push('-map', '1:a');
+      else args.push('-an');
+      const subtitles = multi ? { indexes: [] } : pickSubtitleStrategy(meta, container);
+      for (const subtitleIndex of subtitles.indexes) args.push('-map', `${sourceIndex}:s:${subtitleIndex}`);
+      if (subtitles.indexes.length) {
+        args.push('-c:s', subtitles.codec);
+        if (container === 'mkv' && meta.attachmentCount > 0) args.push('-map', `${sourceIndex}:t?`);
+      }
+      // -t: kopyalanan kuyruk birkaç kare uzun kalabilir; bölüm tam süresinde biter.
+      args.push('-dn', '-map_metadata', String(sourceIndex), '-map_chapters', multi ? '-1' : String(sourceIndex),
+        '-c:v', 'copy', '-c:a', 'copy', '-copyinkf:a', '-t', length.toFixed(6));
+      if (!multi && (container === 'mp4' || container === 'mov')) args.push('-movflags', '+faststart');
+      args.push(target);
+      await runFfmpegProcess(engine, args, { cwd: dir, signal, duration: length });
+      parts.push(target);
+      done += length;
+      report(0);
+    }
+    if (multi) {
+      await fsp.writeFile(path.join(dir, 'list.txt'), parts.map((file) => `file '${file}'`).join('\n'), 'utf8');
+      const args = [
+        '-hide_banner', '-y', '-progress', 'pipe:1', '-nostats',
+        '-f', 'concat', '-safe', '0', '-i', 'list.txt',
+        '-map', '0', '-c', 'copy', '-copyinkf:a', '-map_chapters', '-1',
+      ];
+      if (container === 'mp4' || container === 'mov') args.push('-movflags', '+faststart');
+      args.push(output);
+      await runFfmpegProcess(engine, args, {
+        cwd: dir,
+        signal,
+        duration: plan.duration,
+        onProgress: (data) => onProgress?.({ ...data, percent: 95 + (Number(data.percent) || 0) * 0.05, etaSeconds: 0 }),
+      });
+    }
+    return { ...(await checkVideoOutput(output)), smartCut: true };
+  } finally {
+    await fsp.rm(dir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+async function hasAudioPackets(engine, file) {
+  const { stdout } = await execFileAsync(engine.ffprobe, [
+    '-v', 'error', '-select_streams', 'a:0', '-count_packets',
+    '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', file,
+  ]).catch(() => ({ stdout: '' }));
+  return Number(String(stdout).trim()) > 0;
+}
+
+// Görüntü akışının süresi. MKV'de akış süresi DURATION etiketinde durur.
+async function videoStreamDuration(engine, file) {
+  const { stdout } = await execFileAsync(engine.ffprobe, [
+    '-v', 'error', '-select_streams', 'v:0',
+    '-show_entries', 'stream=duration:stream_tags=DURATION', '-of', 'json', file,
+  ]);
+  const stream = (JSON.parse(stdout).streams || [])[0] || {};
+  const direct = Number(stream.duration);
+  if (Number.isFinite(direct) && direct > 0) return direct;
+  const tag = String(stream.tags?.DURATION || '').match(/^(\d+):(\d+):([\d.]+)/);
+  return tag ? Number(tag[1]) * 3600 + Number(tag[2]) * 60 + Number(tag[3]) : 0;
+}
+
+// Akıllı kesim gerekli mi: desteklenen codec ve en az bir bölüm videonun
+// başından sonra başlıyor (videonun başında zaten anahtar kare vardır).
+function wantsSmartCut(meta, options, plan) {
+  if (options.mode !== 'copy' || options.smartCut === false) return false;
+  if (!shared.smartCutSupported(meta)) return false;
+  return plan.segments.some((segment) => segment.start > 0.001);
 }
 
 // Kayıpsız çok bölümlü kesim: her bölüm akış kopyasıyla ayrı bir dosyaya
@@ -1403,6 +1648,10 @@ module.exports = {
   overlayFilters,
   planSizeMode,
   sizeFitsAsCopy,
+  videoKeyframes,
+  smartHeadEncoderArgs,
+  wantsSmartCut,
+  exportSmartCopy,
   pickSubtitleStrategy,
   exportVideo,
   saveFrame,

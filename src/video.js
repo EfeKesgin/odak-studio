@@ -880,7 +880,7 @@
         this.state.quality = 'crf';
         if (!this.reencodeNoticeShown) {
           this.reencodeNoticeShown = true;
-          toast('Görsel değişiklikler için video yeniden kodlanacak; kesim türü "Tam kesim" oldu.', { type: 'warn' });
+          toast('Görsel değişiklikler için video yeniden kodlanacak; kesim türü "Yeniden kodla" oldu.', { type: 'warn' });
         }
         this.renderAudio();
       }
@@ -1136,9 +1136,12 @@
           ? 'Kırpma, döndürme, boyut, hız veya metin varken video yeniden kodlanmak zorunda.'
           : '';
       });
-      this.els.trimHint.textContent = fast
-        ? 'Kalite hiç değişmez ve çok hızlıdır, ama başlangıç en yakın anahtar kareye kayabilir (genelde 1–2 sn erken).'
-        : 'Başlangıç ve bitiş tam seçtiğin yerde olur. Video yüksek kalitede yeniden kodlanır.';
+      const smart = window.OdakShared.smartCutSupported(this.state.meta);
+      this.els.trimHint.textContent = !fast
+        ? 'Video baştan sona yüksek kalitede yeniden kodlanır. Döndürme, kırpma, hız ve metin için gerekir.'
+        : smart
+          ? 'Kesim tam seçtiğin karede olur. Görüntü olduğu gibi kopyalanır; yalnızca ilk anahtar kareye kadarki kısa bölüm (genelde 1–2 sn) yeniden kodlanır.'
+          : 'Bu video türünde başlangıç en yakın anahtar kareye kayabilir (genelde 1–2 sn erken). Kareye tam kesim için "Yeniden kodla"yı seç.';
       if (this.state.segments.length) this.els.segmentDetails.open = true;
       if (Math.abs(this.state.speed - 1) > 0.0001) {
         this.els.speedChip.textContent = `${this.state.speed}×`;
