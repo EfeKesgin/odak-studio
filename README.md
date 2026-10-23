@@ -23,14 +23,17 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
 
 | | |
 | --- | --- |
-| **Video** | Kolay kesim: oynat, "Başlangıç burası" / "Bitiş burası" de, dışa aktar. Tam kesim ya da hızlı kayıpsız kesim; çok bölümlü kesim, kırpma, döndürme, boyutlandırma, hız. H.264 / H.265 / VP9 / ProRes. |
-| **Hedef boyut** | "Bu video 10 MB olsun" de, gerisini o halletsin: Discord, WhatsApp, e-posta için hazır ayarlar. |
+| **Kolay kesim** | Oynat, "Başlangıç burası" / "Bitiş burası" de, dışa aktar. **Akıllı kesim** sayesinde kesim hem kayıpsız hem tam seçtiğin karede: görüntü kopyalanır, yalnızca ilk anahtar kareye kadarki 1–2 saniye yeniden kodlanır. |
+| **Sessiz kısımları çıkar** | Konuşma videolarındaki boşlukları tek tıkla bulur ve keser; kalan parçalar listede, istemediğini silersin. |
+| **Video** | Çok bölümlü kesim, kırpma, döndürme, boyutlandırma, hız. H.264 / H.265 / VP9 / ProRes. |
+| **Hedef boyut** | "Bu video 10 MB olsun" de, gerisini o halletsin: Discord, WhatsApp, e-posta için hazır ayarlar. Zaten küçük video büyütülmez, kalite kaybı olmadan kopyalanır. |
+| **Sağ tıkla küçült** | Gezginde videoya sağ tık → **Odak ile küçült → Discord / WhatsApp / E-posta**. Editör açılmadan küçültülür, yeni dosya asıl dosyanın yanına kaydedilir. |
 | **Metin ve altyazı** | Videoya, fotoğrafa ve GIF'e yazı veya filigran; altyazıyı videoya yakma. |
 | **Hız** | NVIDIA, Intel ve AMD ekran kartlarıyla birkaç kat daha hızlı kodlama (varsa). |
 | **Fotoğraf** | Kırp, döndür, boyutlandır; JPEG, PNG, WebP, AVIF, TIFF. Renk profili ve EXIF korunur. |
 | **GIF** | Video ve fotoğraflardan GIF; klip sırası, kırpma, hız, FPS, üst/alt yazı. |
 | **Toplu işlem** | Yüzlerce dosyayı aynı ayarla dönüştür; videoları tek dosyada birleştir. |
-| **Kolay kullanım** | Gezginde sağ tık → **Birlikte aç → Odak Studio**; videoda geri al / yinele (Ctrl+Z / Ctrl+Y). |
+| **Kolay kullanım** | Gezginde sağ tık → **Birlikte aç → Odak Studio**; geri al / yinele (Ctrl+Z / Ctrl+Y). |
 | **Dil** | Türkçe ve İngilizce arayüz. |
 
 <table>
@@ -43,10 +46,12 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
     <td align="center"><sub>GIF stüdyosu</sub></td>
   </tr>
   <tr>
-    <td colspan="2"><img src="docs/screenshots/merge.png" alt="Videoları birleştirme"></td>
+    <td><img src="docs/screenshots/merge.png" alt="Videoları birleştirme"></td>
+    <td><img src="docs/screenshots/compress.png" alt="Odak ile küçült"></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><sub>Farklı boyuttaki videoları tek dosyada birleştirme</sub></td>
+    <td align="center"><sub>Farklı boyuttaki videoları tek dosyada birleştirme</sub></td>
+    <td align="center"><sub>Gezginde sağ tık → Odak ile küçült</sub></td>
   </tr>
 </table>
 
@@ -71,10 +76,12 @@ sayfadaki [Sürümler](https://github.com/EfeKesgin/odak-studio/releases) bölü
 ## English
 
 **Odak Studio** is a free, open-source, quality-first video, photo and GIF studio for Windows.
-Lossless trimming, multi-segment cuts, target file size (e.g. "fit into 10 MB"), text and
-watermarks, subtitle burn-in, GPU encoding (NVENC / Quick Sync / AMF), batch conversion and video
-merging. Everything runs locally; no account, ads or watermarks. The interface is available in
-English and Turkish (Help → Language).
+Smart cut (lossless *and* frame-exact trimming: only the first 1–2 seconds up to the next
+keyframe are re-encoded), one-click silence removal, target file size (e.g. "fit into 10 MB"),
+"Shrink with Odak" in the Explorer right-click menu, multi-segment cuts, text and watermarks,
+subtitle burn-in, GPU encoding (NVENC / Quick Sync / AMF), batch conversion and video merging.
+Everything runs locally; no account, ads or watermarks. The interface is available in English and
+Turkish (language button in the sidebar).
 [Download for Windows](https://github.com/EfeKesgin/odak-studio/releases/latest).
 
 ---
@@ -91,8 +98,20 @@ Aşağıdaki bölümler projeyi kaynaktan çalıştırmak, paketlemek ve katkıd
 - **Hedef dosya boyutu:** İki geçişli kodlama; çıktı hedefi aşarsa bir kez daha düşük bit hızıyla
   düzeltilir. Hedef bir üst sınırdır: kısa veya zaten küçük videolar şişirilmez (bit hızı kaynağı
   aşmaz). GPU'da kodlayıcının kendi çok geçişli modu kullanılır.
+- **Akıllı kesim (H.264, VP9):** Kayıpsız kesimde başlangıç bir anahtar kare değilse yalnızca
+  başlangıçtan ilk anahtar kareye kadarki bölüm kaynağın profil/seviye/renk ayarlarıyla
+  yeniden kodlanır, gerisi bit bit kopyalanır. H.264 parçaları ara adımda MPEG-TS'te tutulur
+  (her anahtar kare kendi SPS/PPS'ini taşır). Ses ayrı ve tam kesilir; döndürme bilgisi
+  korunur. Çıktının görüntü süresi beklenenden farklıysa anahtar kare kopyasına dönülür. HEVC'de
+  MP4 `hvc1` parametre değişimine izin vermediği için anahtar kareye hizalı kopya kullanılır.
 - **Çok bölümlü kesim:** `I` / `O` ile giriş/çıkış noktası, `B` ile seçimi bölüm olarak ekleme.
-  Kopya modunda bölümler ayrı kesilip concat ile, yeniden kodlamada tek filtre grafiğinde birleşir.
+  Kopya modunda bölümler akıllı kesimle ayrı kesilip concat ile, yeniden kodlamada tek filtre
+  grafiğinde birleşir.
+- **Sessiz kısımlar:** FFmpeg `silencedetect` (yalnızca ses çözülür); her boşluğun iki yanında
+  0,15 sn pay kalır ve kalan parçalar bölüm listesine yazılır.
+- **Odak ile küçült:** Kurulum, video uzantılarının `SystemFileAssociations` anahtarına bir alt
+  menü ekler (dosya ilişkileri değişmez); uygulama `--compress=discord|whatsapp|email` ile açılır
+  ve editör yerine küçük bir kuyruk penceresi gösterir (`electron/quick-compress.js`).
 - **Metin katmanları:** Video ve GIF'te libass (ASS), fotoğrafta SVG ile çizilir; önizleme ile
   çıktının aynı görünmesi için yazı tipi oranları ölçülerek ayarlanmıştır.
 - **Donanım kodlama:** Açılışta her GPU kodlayıcı gerçek bir deneme kodlamasıyla test edilir;
@@ -214,9 +233,9 @@ Bu komut şunları doğrular:
 
 ### Kalite notları
 
-- **Hızlı · kayıpsız kesim** anahtar kareye hizalanır; başlangıç genelde 1–2 sn (bazen daha
-  fazla) erken olabilir. Bu, görüntünün yeniden kodlanmaması için bilinçli bir tercihtir.
-  Kare hassasiyeti gerekiyorsa kesim türünü **Tam kesim** yap.
+- **Kayıpsız kesim** H.264 ve VP9 videolarda akıllı kesimle kareye tamdır. HEVC ve diğer
+  codec'lerde anahtar kareye hizalanır; başlangıç genelde 1–2 sn (bazen daha fazla) erken
+  olabilir. Kare hassasiyeti gerekiyorsa kesim türünü **Yeniden kodla** yap.
 - **10-bit / HDR kaynaklar** için H.265 (veya VP9) önerilir. H.264 10-bit çıktısı her oynatıcıda
   desteklenmeyebilir.
 - **ProRes** seçildiğinde ses, çoğu durumda PCM olarak yazılır; kapsayıcı MOV olur.
