@@ -956,6 +956,7 @@
       this.els.videoCodec.value = video.codec;
       this.els.videoQuality.value = video.quality;
       this.els.videoCrf.value = String(video.crf);
+      ui.paintRange(this.els.videoCrf);
       this.els.videoCrfValue.textContent = `CRF ${video.crf}`;
       this.els.videoPreset.value = video.preset;
       this.els.videoBitrate.value = String(video.bitrateKbps);
@@ -1011,6 +1012,7 @@
       this.els.mergeMode.value = merge.mode;
       this.els.mergeCodec.value = merge.codec;
       this.els.mergeCrf.value = String(merge.crf);
+      ui.paintRange(this.els.mergeCrf);
       this.els.mergeCrfValue.textContent = `CRF ${merge.crf}`;
       this.els.mergePreset.value = merge.preset;
       this.els.mergeEncoder.value = merge.encoder;

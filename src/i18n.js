@@ -172,6 +172,8 @@
     'Geliştirme sürümünde kapalı': 'Off in development builds',
     'Güncelleme için önce süren işlemin bitmesini bekle.': 'Wait for the running job to finish before updating.',
     'Dil değişikliği uygulamayı yeniden yükler.': 'Changing the language reloads the app.',
+    'Dili değiştir': 'Change language',
+    'Dil, işlem bitince değiştirilebilir.': 'The language can be changed when the job finishes.',
     'FFmpeg bulunamazsa videolar dışa aktarılamaz.': 'Videos cannot be exported without FFmpeg.',
 
     // ── Video düzenleyici ──

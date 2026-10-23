@@ -334,10 +334,7 @@
 
     renderSize(layer) {
       this.sizeLabel.textContent = `%${window.OdakUI.formatNumber(layer.size)}`;
-      const min = Number(this.sizeInput.min);
-      const max = Number(this.sizeInput.max);
-      const fill = ((layer.size - min) / (max - min)) * 100;
-      this.sizeInput.style.background = `linear-gradient(90deg, var(--accent) 0%, var(--accent) ${fill}%, rgba(255,255,255,0.09) ${fill}%, rgba(255,255,255,0.09) 100%)`;
+      window.OdakUI.paintRange(this.sizeInput);
     }
 
     // Zaman değişince (video oynarken) yalnızca görünürlük güncellenir.

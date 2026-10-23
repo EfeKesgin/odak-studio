@@ -477,15 +477,16 @@ kbd {
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
 }
 
 .btn.accent:disabled {
-  background: rgba(201, 247, 93, 0.2);
-  border-color: transparent;
-  color: rgba(17, 20, 10, 0.6);
+  opacity: 1;
+  background: rgba(201, 247, 93, 0.08);
+  border-color: rgba(201, 247, 93, 0.16);
+  color: rgba(201, 247, 93, 0.5);
   box-shadow: none;
 }
 
@@ -2130,8 +2131,8 @@ kbd {
   flex: none;
   width: 106px;
   color: var(--muted-2);
-  font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2321,7 +2322,7 @@ kbd {
 }
 
 .codec-grid.disabled {
-  opacity: 0.35;
+  opacity: 0.55;
   pointer-events: none;
 }
 
@@ -3104,6 +3105,11 @@ kbd {
   padding: 0;
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
   overflow: hidden;
+}
+
+.modal:focus,
+.modal:focus-visible {
+  outline: none;
 }
 
 .modal::backdrop {

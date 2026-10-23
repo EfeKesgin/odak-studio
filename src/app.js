@@ -502,7 +502,9 @@
     els.engineBadge.classList.remove('ok', 'bad');
     if (engine?.available) {
       els.engineBadge.classList.add('ok');
-      els.engineText.textContent = engine.version || 'hazır';
+      // Rozette yalnızca sürüm numarası: "8.1.2-essentials_build-www.gyan.dev" → "8.1.2".
+      const short = String(engine.version || '').match(/^n?(\d+(?:\.\d+)*)/);
+      els.engineText.textContent = short ? short[1] : (engine.version || 'hazır');
       els.engineBadge.title = `FFmpeg ${engine.version || ''} · hazır`;
     } else {
       els.engineBadge.classList.add('bad');
@@ -781,16 +783,28 @@
       select.appendChild(option);
     }
     select.value = i18n.getLanguage();
-    select.addEventListener('change', async () => {
-      const language = select.value;
-      const preferences = { ...(appState.config.preferences || {}), ui: { ...(appState.config.preferences?.ui || {}), language } };
-      appState.config.preferences = preferences;
-      try {
-        await api.setConfig({ preferences: { ui: preferences.ui } });
-      } finally {
-        api.reload().catch(() => {});
-      }
-    });
+    select.addEventListener('change', () => switchLanguage(select.value));
+    // Kenar çubuğundaki düğme diğer dile geçer; adı o dilin kendi adıdır.
+    const button = document.getElementById('languageBtn');
+    const other = i18n.LANGUAGES.find((language) => language.code !== i18n.getLanguage());
+    if (button && other) {
+      document.getElementById('languageBtnText').textContent = other.name;
+      button.addEventListener('click', () => switchLanguage(other.code));
+    }
+  }
+
+  async function switchLanguage(language) {
+    if (appState.exportRunning || appState.batchRunning) {
+      toast('Dil, işlem bitince değiştirilebilir.', { type: 'warn' });
+      return;
+    }
+    const preferences = { ...(appState.config.preferences || {}), ui: { ...(appState.config.preferences?.ui || {}), language } };
+    appState.config.preferences = preferences;
+    try {
+      await api.setConfig({ preferences: { ui: preferences.ui } });
+    } finally {
+      api.reload().catch(() => {});
+    }
   }
 
   function closeHelp() {

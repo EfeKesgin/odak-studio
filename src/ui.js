@@ -197,6 +197,16 @@
     else element.classList.toggle(className);
   }
 
+  // Kaydırıcının dolu kısmı tutamağın ortasında biter (tutamak 14 px).
+  function paintRange(input) {
+    if (!input) return;
+    const min = Number(input.min) || 0;
+    const max = Number(input.max) || 100;
+    const ratio = clamp((Number(input.value) - min) / Math.max(1e-9, max - min), 0, 1);
+    const stop = `calc(7px + (100% - 14px) * ${ratio.toFixed(4)})`;
+    input.style.background = `linear-gradient(90deg, var(--accent) 0%, var(--accent) ${stop}, rgba(255,255,255,0.09) ${stop}, rgba(255,255,255,0.09) 100%)`;
+  }
+
   window.OdakUI = {
     $,
     $$,
@@ -220,5 +230,6 @@
     clearToasts,
     parseNumber,
     toggleClass,
+    paintRange,
   };
 })();

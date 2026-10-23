@@ -1292,8 +1292,7 @@
       this.els.codecNote.textContent = ext.replace('.', '').toUpperCase();
       this.els.crfRange.value = String(this.state.crf);
       this.els.crfValue.textContent = String(this.state.crf);
-      const fillPercent = ((this.state.crf - 10) / 20) * 100;
-      this.els.crfRange.style.background = `linear-gradient(90deg, var(--accent) 0%, var(--accent) ${fillPercent}%, rgba(255,255,255,0.09) ${fillPercent}%, rgba(255,255,255,0.09) 100%)`;
+      ui.paintRange(this.els.crfRange);
       this.els.preset.value = this.state.preset;
       const aacOption = this.els.audioMode.querySelector('option[value="aac"]');
       if (aacOption) {
