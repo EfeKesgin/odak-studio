@@ -23,7 +23,7 @@ function check(text, where) {
 }
 
 // 1) HTML'deki görünen metinler ve öznitelikler
-const html = fs.readFileSync(path.join(root, 'src/index.html'), 'utf8')
+const html = ['src/index.html', 'src/compress.html'].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n')
   .replace(/<symbol[\s\S]*?<\/symbol>/g, '')
   .replace(/<script[\s\S]*?<\/script>/g, '');
 const decode = (text) => text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
@@ -43,8 +43,8 @@ for (const text of htmlTexts) if (!htmlExempt.has(text)) check(text, 'index.html
 // 2) Arayüze giden sabit metinler (tek tırnaklı, Türkçe harf içeren)
 const sources = [
   'src/app.js', 'src/ui.js', 'src/video.js', 'src/photo.js', 'src/gif.js', 'src/batch.js',
-  'src/batch-plan.js', 'src/text-layers.js', 'src/shared.js',
-  'electron/main.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js',
+  'src/batch-plan.js', 'src/text-layers.js', 'src/shared.js', 'src/compress.js',
+  'electron/main.js', 'electron/quick-compress.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js',
 ];
 // Kod içi anahtarlar/değerler: ekranda gösterilmez veya kendi başına çevrilmez.
 const codeExempt = new Set([

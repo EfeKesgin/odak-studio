@@ -455,6 +455,23 @@ assert.deepStrictEqual(shared.keepRangesFromSilences([{ start: 0.05, end: 1 }, {
   [{ start: 0.85, end: 3 }]);
 assert.deepStrictEqual(shared.keepRangesFromSilences([], 1, 3), [{ start: 1, end: 3 }]);
 
+// u) Gezgin sag tik: "Odak ile kucult"
+const quick = require('../electron/quick-compress.js');
+const thisFile = require('node:path').resolve(__filename);
+assert.strictEqual(quick.compressRequestFromArgs(['odak.exe', thisFile], () => true), null, 'bayraksiz acilis editoru acar');
+assert.deepStrictEqual(quick.compressRequestFromArgs(['odak.exe', '--compress=discord', thisFile], () => true), { preset: 'discord', files: [thisFile] });
+assert.strictEqual(quick.compressRequestFromArgs(['odak.exe', '--compress=bilinmeyen', thisFile], () => true), null);
+assert.strictEqual(quick.compressRequestFromArgs(['odak.exe', '--compress=discord', thisFile], () => false), null, 'video olmayan dosya atlanir');
+const quickOpts = quick.quickCompressOptions({ width: 1920, height: 1080, duration: 30, hasAudio: true }, 'discord');
+assert.strictEqual(quickOpts.mode, 'size');
+assert.strictEqual(quickOpts.targetMB, 9.5);
+assert.deepStrictEqual(quickOpts.resize, { width: 1280, height: 720 });
+const portrait = quick.quickCompressOptions({ width: 720, height: 1280, duration: 30, hasAudio: false }, 'whatsapp');
+assert.strictEqual(portrait.resize, null, 'kucuk video buyutulmez');
+assert.strictEqual(portrait.audioMode, 'none');
+assert.strictEqual(quick.quickCompressOptions({ width: 3840, height: 2160, duration: 9 }, 'email').resize, null, 'e-posta ayarinda boyut siniri yok');
+assert.strictEqual(quick.quickCompressBaseName('C:/v/tatil.mp4', 'email'), 'tatil-eposta');
+
 // r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
 assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);
 assert.strictEqual(shared.parseTimecode('01:02:03,25'), 3723.25);

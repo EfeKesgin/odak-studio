@@ -69,13 +69,17 @@ ok(`getElementById referanslari (${idRefs} adet)`);
   if (JSON.stringify(listed) !== JSON.stringify(expected)) fail(`open-with.nsh uzantilari farkli: ${listed.join(',')} != ${expected.join(',')}`);
   if (require(path.join(root, 'package.json')).build.nsis.include !== 'installer/open-with.nsh') fail('nsis.include ayarli degil');
   ok(`Birlikte ac uzantilari (${listed.length})`);
+  // "Odak ile kucult" sag tik menusu yalnizca videolarda
+  const videos = [...nsh.matchAll(/insertmacro \$\{VMACRO\} "\.([a-z0-9]+)"/g)].map((m) => m[1]).sort();
+  if (JSON.stringify(videos) !== JSON.stringify([...shared.VIDEO_EXTENSIONS].sort())) fail(`kucult menusu uzantilari farkli: ${videos.join(',')}`);
+  ok(`Kucult menusu uzantilari (${videos.length})`);
 }
 
 // 6) UTF-8 gecerliligi
 const files = [
   'package.json', 'README.md', '.gitignore', 'scripts/prepare-ffmpeg.js', 'scripts/publish-release.js',
-  'installer/open-with.nsh', 'electron/main.js', 'electron/logger.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
-  'src/index.html', 'src/styles.css', 'src/ui.js', 'src/crop.js', 'src/text-layers.js', 'src/video.js', 'src/photo.js', 'src/gif.js',
+  'installer/open-with.nsh', 'electron/main.js', 'electron/quick-compress.js', 'electron/logger.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
+  'src/index.html', 'src/compress.html', 'src/compress.js', 'src/styles.css', 'src/ui.js', 'src/crop.js', 'src/text-layers.js', 'src/video.js', 'src/photo.js', 'src/gif.js',
   'src/i18n.js', 'src/shared.js', 'src/batch-plan.js', 'src/batch.js', 'src/app.js',
   'test/i18n.test.js',
   'test/gif-plan.test.js', 'test/batch-plan.test.js', 'test/video-transport.test.js',

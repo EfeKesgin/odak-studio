@@ -12,6 +12,7 @@ const {
   detectEngine,
   probeMedia,
   probeVideo,
+  isVideoPath,
   probeImage,
   makeFilmstrip,
   detectSilences,
@@ -45,6 +46,7 @@ const { MEDIA_EXTENSION } = require('../src/shared.js');
 const { t, setLanguage, languageForLocale } = require('../src/i18n.js');
 
 const log = require('./logger');
+const { compressRequestFromArgs, quickCompressOptions, quickCompressBaseName } = require('./quick-compress');
 
 function applyLanguage() {
   setLanguage(config.preferences?.ui?.language || languageForLocale(app.getLocale()));
@@ -158,13 +160,20 @@ function mediaFileFromArgs(argv) {
   return null;
 }
 
-let pendingOpenFile = mediaFileFromArgs(process.argv);
+// "--compress=..." ile açılış editörü değil hızlı küçültme penceresini açar.
+let pendingOpenFile = compressRequestFromArgs(process.argv, isVideoPath) ? null : mediaFileFromArgs(process.argv);
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) app.quit();
 
 app.on('second-instance', (event, argv) => {
   if (!hasSingleInstanceLock) return;
+  const request = compressRequestFromArgs(argv, isVideoPath);
+  if (request) {
+    if (appStarted) enqueueCompress(request);
+    else pendingCompressRequests.push(request);
+    return;
+  }
   const file = mediaFileFromArgs(argv);
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore();
@@ -609,6 +618,166 @@ ipcMain.handle('media:silences', async (event, payload = {}) => {
     to: Number(payload.to) || 0,
     noiseDb: Number(payload.noiseDb) || -35,
   });
+});
+
+// ── Hızlı küçültme (Gezgin sağ tık → "Odak ile küçült") ────────────────
+// Editör açılmadan küçük bir pencerede sırayla işlenir. Gezgin birden çok
+// dosya seçildiğinde her dosya için ayrı çağırır; ikinci örnekler aynı
+// kuyruğa eklenir.
+const compressQueue = [];
+let compressWindow = null;
+let compressRunning = false;
+let compressSeq = 0;
+let compressLastSent = 0;
+let appStarted = false;
+const pendingCompressRequests = [];
+
+function compressSnapshot() {
+  return compressQueue.map(({ controller, ...item }) => item);
+}
+
+function sendCompressState(force = true) {
+  if (!compressWindow || compressWindow.isDestroyed()) return;
+  const now = Date.now();
+  if (!force && now - compressLastSent < 200) return;
+  compressLastSent = now;
+  compressWindow.webContents.send('compress:update', compressSnapshot());
+}
+
+function openCompressWindow() {
+  if (compressWindow && !compressWindow.isDestroyed()) {
+    if (compressWindow.isMinimized()) compressWindow.restore();
+    compressWindow.focus();
+    return;
+  }
+  compressWindow = new BrowserWindow({
+    width: 520,
+    height: 400,
+    minWidth: 400,
+    minHeight: 260,
+    maximizable: false,
+    backgroundColor: '#0b0c0e',
+    show: false,
+    title: 'Odak Studio',
+    icon: path.join(__dirname, '..', 'assets', 'icon.png'),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      spellcheck: false,
+      backgroundThrottling: false,
+    },
+  });
+  compressWindow.setMenu(null);
+  compressWindow.loadFile(path.join(__dirname, '..', 'src', 'compress.html'));
+  compressWindow.once('ready-to-show', () => compressWindow?.show());
+  compressWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  compressWindow.webContents.on('will-navigate', (event) => event.preventDefault());
+  compressWindow.on('closed', () => {
+    compressWindow = null;
+    // Pencere kapanınca bekleyen ve süren işler iptal edilir.
+    for (const item of compressQueue) {
+      if (item.status === 'waiting') item.status = 'canceled';
+      if (item.status === 'running') item.controller?.abort();
+    }
+  });
+}
+
+function enqueueCompress(request) {
+  for (const file of request.files) {
+    compressQueue.push({
+      id: `c${++compressSeq}`,
+      file,
+      name: path.basename(file),
+      preset: request.preset,
+      status: 'waiting',
+      percent: 0,
+    });
+  }
+  openCompressWindow();
+  sendCompressState();
+  runCompressQueue();
+}
+
+async function runCompressQueue() {
+  if (compressRunning) return;
+  compressRunning = true;
+  try {
+    let item = compressQueue.find((entry) => entry.status === 'waiting');
+    while (item) {
+      await runCompressItem(item);
+      item = compressQueue.find((entry) => entry.status === 'waiting');
+    }
+  } finally {
+    compressRunning = false;
+  }
+}
+
+async function runCompressItem(item) {
+  item.status = 'running';
+  const controller = new AbortController();
+  item.controller = controller;
+  sendCompressState();
+  let tempPath = null;
+  try {
+    if (!engine.available) throw new Error('FFmpeg bulunamadı.');
+    const meta = await probeVideo(engine, item.file);
+    if (meta.duration <= 0) throw new Error('Videonun süresi okunamadı.');
+    item.sourceSize = meta.size;
+    const encoder = config.preferences?.video?.encoder === 'gpu' ? 'gpu' : 'cpu';
+    const options = quickCompressOptions(meta, item.preset, { encoder });
+    options.hwVendor = resolveHardwareVendor(options, await hardwarePromise);
+    const plan = planVideo(meta, options);
+    // Çıktı kaynağın yanına yazılır; o klasör yazılamıyorsa video klasörüne.
+    let outputDir = path.dirname(item.file);
+    try {
+      await fsp.access(outputDir, fs.constants.W_OK);
+    } catch {
+      outputDir = await ensureOutputDir(config.videoOutputDir, app.getPath('videos'));
+    }
+    const outputPath = await uniquePath(outputDir, sanitizeBaseName(quickCompressBaseName(item.file, item.preset)), plan.ext);
+    tempPath = path.join(outputDir, `.odak-${crypto.randomUUID()}${plan.ext}`);
+    const result = await exportVideo(engine, item.file, meta, options, tempPath, plan, {
+      signal: controller.signal,
+      onProgress: (data) => {
+        item.percent = Math.max(0, Math.min(99, Number(data.percent) || 0));
+        sendCompressState(false);
+      },
+    });
+    await fsp.rename(tempPath, outputPath);
+    tempPath = null;
+    rememberOutput(outputPath);
+    item.output = outputPath;
+    item.size = (await fsp.stat(outputPath)).size;
+    item.keptSource = Boolean(result.keptSource);
+    item.overTarget = Boolean(result.overTarget);
+    item.percent = 100;
+    item.status = 'done';
+  } catch (error) {
+    if (tempPath) await fsp.rm(tempPath, { force: true }).catch(() => {});
+    if (error.cancelled || controller.signal.aborted) {
+      item.status = 'canceled';
+    } else {
+      item.status = 'error';
+      item.error = error.message || 'Küçültme tamamlanamadı.';
+      log.error(`Quick compress failed: ${item.name}`, error.stack || error.message);
+    }
+  } finally {
+    delete item.controller;
+    sendCompressState();
+  }
+}
+
+ipcMain.handle('compress:state', async () => compressSnapshot());
+
+ipcMain.handle('compress:cancel', async (event, id) => {
+  const item = compressQueue.find((entry) => entry.id === String(id));
+  if (!item) return false;
+  if (item.status === 'waiting') item.status = 'canceled';
+  else if (item.status === 'running') item.controller?.abort();
+  sendCompressState();
+  return true;
 });
 
 ipcMain.handle('video:export', async (event, payload = {}) => {
@@ -1056,8 +1225,12 @@ app.whenReady().then(async () => {
   app.on('render-process-gone', (event, contents, details) => log.error(`Renderer process gone: ${details.reason}`, details));
   app.on('child-process-gone', (event, details) => log.error(`Child process gone: ${details.type} ${details.reason}`));
   await startMediaServer();
-  createWindow();
   hardwarePromise = detectHardwareEncoders(engine).catch(() => ({ h264: [], h265: [] }));
+  const compressRequest = compressRequestFromArgs(process.argv, isVideoPath);
+  if (compressRequest) pendingCompressRequests.unshift(compressRequest);
+  else createWindow();
+  appStarted = true;
+  for (const request of pendingCompressRequests.splice(0)) enqueueCompress(request);
   setupAutoUpdate();
 
   app.on('activate', () => {

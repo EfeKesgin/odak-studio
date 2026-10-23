@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Odak ile küçült</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="compress-page">
+  <svg class="svg-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h4l2 2.5h7A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  </svg>
+  <header class="compress-head">
+    <div class="eyebrow"><span></span>ODAK İLE KÜÇÜLT</div>
+    <h1 id="compressTitle">Video küçültülüyor</h1>
+    <p class="muted">Küçültülen dosya kaynağın yanına kaydedilir; asıl dosyaya dokunulmaz.</p>
+  </header>
+  <ul class="compress-list" id="compressList"></ul>
+  <footer class="compress-foot">
+    <button class="btn ghost" id="compressCloseBtn">Kapat</button>
+  </footer>
+  <script src="./i18n.js"></script>
+  <script src="./compress.js"></script>
+</body>
+</html>

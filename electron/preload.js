@@ -62,6 +62,13 @@ contextBridge.exposeInMainWorld('odak', {
     ipcRenderer.on('app:open-file', listener);
     return () => ipcRenderer.removeListener('app:open-file', listener);
   },
+  compressState: () => invoke('compress:state'),
+  compressCancel: (id) => invoke('compress:cancel', id),
+  onCompressUpdate: (callback) => {
+    const listener = (event, data) => callback(data);
+    ipcRenderer.on('compress:update', listener);
+    return () => ipcRenderer.removeListener('compress:update', listener);
+  },
   getPathForFile: (file) => webUtils.getPathForFile(file),
   onJobProgress: (callback) => {
     const listener = (event, data) => callback(data);

@@ -4167,3 +4167,114 @@ kbd {
     font-size: 14px;
   }
 }
+
+/* ── "Odak ile küçült" penceresi (Gezgin sağ tık) ── */
+.compress-page {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 14px;
+}
+
+.compress-head h1 {
+  margin: 6px 0 4px;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+
+.compress-head p {
+  margin: 0;
+  font-size: 11px;
+}
+
+.compress-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compress-item {
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.compress-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.compress-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.compress-item-top small {
+  flex: none;
+  color: var(--muted-2);
+  font-size: 10px;
+}
+
+.compress-item .progress-track {
+  margin: 9px 0 8px;
+}
+
+.compress-item.done .progress-bar {
+  background: var(--accent);
+}
+
+.compress-item.error .progress-bar,
+.compress-item.canceled .progress-bar {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.compress-item-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.compress-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.compress-status .icon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.compress-item.done .compress-status {
+  color: var(--text);
+}
+
+.compress-item.done .compress-status .icon {
+  color: var(--accent);
+}
+
+.compress-item.error .compress-status {
+  color: var(--danger);
+}
+
+.compress-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
