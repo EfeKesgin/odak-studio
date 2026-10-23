@@ -1341,6 +1341,37 @@ async function hasAudioPackets(engine, file) {
   return Number(String(stdout).trim()) > 0;
 }
 
+// Sessiz aralıklar (silencedetect). Yalnızca ilk ses izi çözülür; görüntüye
+// dokunulmaz, bu yüzden uzun videolarda da birkaç saniye sürer.
+function parseSilenceLog(text, duration = 0) {
+  const silences = [];
+  let open = null;
+  for (const line of String(text || '').split(/\r?\n/)) {
+    const started = line.match(/silence_start:\s*(-?[\d.]+)/);
+    if (started) open = Math.max(0, Number(started[1]));
+    const ended = line.match(/silence_end:\s*([\d.]+)/);
+    if (ended && open !== null) {
+      silences.push({ start: open, end: Number(ended[1]) });
+      open = null;
+    }
+  }
+  // Video sessizlikle bitiyorsa son kayıtta silence_end olmaz.
+  if (open !== null && duration > open) silences.push({ start: open, end: duration });
+  return silences;
+}
+
+async function detectSilences(engine, input, { from = 0, to = 0, noiseDb = -35, minSeconds = shared.SILENCE_MIN_SECONDS, signal } = {}) {
+  const args = ['-hide_banner', '-nostats'];
+  if (from > 0.001) args.push('-ss', from.toFixed(6));
+  if (to > from) args.push('-t', (to - from).toFixed(6));
+  args.push('-i', input, '-map', '0:a:0', '-vn', '-sn', '-dn',
+    '-af', `silencedetect=noise=${Math.round(noiseDb)}dB:d=${Number(minSeconds).toFixed(2)}`, '-f', 'null', nullOutput());
+  const { stderr } = await execFileAsync(engine.ffmpeg, args, { signal, maxBuffer: 64 * 1024 * 1024 });
+  // -ss ile zamanlar seçimin başından sayılır; videonun zamanına çevrilir.
+  return parseSilenceLog(stderr, to > from ? to - from : 0)
+    .map((item) => ({ start: item.start + from, end: item.end + from }));
+}
+
 // Görüntü akışının süresi. MKV'de akış süresi DURATION etiketinde durur.
 async function videoStreamDuration(engine, file) {
   const { stdout } = await execFileAsync(engine.ffprobe, [
@@ -1649,6 +1680,8 @@ module.exports = {
   planSizeMode,
   sizeFitsAsCopy,
   videoKeyframes,
+  parseSilenceLog,
+  detectSilences,
   smartHeadEncoderArgs,
   wantsSmartCut,
   exportSmartCopy,

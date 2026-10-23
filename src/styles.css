@@ -1352,6 +1352,25 @@ kbd {
   font-weight: 600;
 }
 
+.silence-tool {
+  margin-top: 12px;
+}
+
+.silence-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 128px;
+  gap: 6px;
+  align-items: center;
+}
+
+.silence-row .btn {
+  width: 100%;
+}
+
+.silence-row .field select {
+  height: 32px;
+}
+
 .trim-more {
   margin-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.045);

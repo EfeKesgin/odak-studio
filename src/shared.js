@@ -106,6 +106,36 @@
     return { head: [start, key], tail: [key, end] };
   }
 
+  // Sessiz kısımları çıkarma. Ortam seçimi FFmpeg silencedetect eşiğidir:
+  // gürültülü kayıtta eşik yükselir, sessiz odada düşer.
+  const SILENCE_LEVELS = { quiet: -45, normal: -35, noisy: -25 };
+  const SILENCE_MIN_SECONDS = 0.6;
+
+  // Sessizliklerden kalan (konuşulan) aralıklar. Her sessizliğin iki
+  // yanında "padding" kadar pay bırakılır ki kelimeler kesilmesin; çok kısa
+  // kalan parçalar atılır. Sonuç [from, to] içindedir.
+  function keepRangesFromSilences(silences, from, to, { padding = 0.15, minKeep = 0.25 } = {}) {
+    const start = Math.max(0, Number(from) || 0);
+    const end = Math.max(start, Number(to) || 0);
+    const gaps = (Array.isArray(silences) ? silences : [])
+      .map((item) => ({ start: Number(item.start), end: Number(item.end) }))
+      .filter((item) => Number.isFinite(item.start) && Number.isFinite(item.end))
+      .map((item) => ({ start: item.start + padding, end: item.end - padding }))
+      .filter((item) => item.end - item.start > 0.05)
+      .sort((a, b) => a.start - b.start);
+    const keep = [];
+    let cursor = start;
+    for (const gap of gaps) {
+      if (gap.end <= cursor || gap.start >= end) continue;
+      if (gap.start > cursor) keep.push({ start: cursor, end: Math.min(gap.start, end) });
+      cursor = Math.max(cursor, gap.end);
+    }
+    if (cursor < end) keep.push({ start: cursor, end });
+    return keep
+      .filter((range) => range.end - range.start >= minKeep)
+      .map((range) => ({ start: Math.round(range.start * 1000) / 1000, end: Math.round(range.end * 1000) / 1000 }));
+  }
+
   // Kesim kutularına yazılan zaman: "1:05.5", "01:02:03,25", "65" veya
   // "65,5". Saniyeye çevrilir; anlaşılmazsa NaN döner.
   function parseTimecode(value) {
@@ -406,6 +436,9 @@
     SIZE_MAX_MB,
     sizeModeBitrates,
     parseTimecode,
+    SILENCE_LEVELS,
+    SILENCE_MIN_SECONDS,
+    keepRangesFromSilences,
     SMART_CUT_CODECS,
     smartCutSupported,
     smartCutSplit,

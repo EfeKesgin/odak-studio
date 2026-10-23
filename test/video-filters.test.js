@@ -441,6 +441,20 @@ assert.ok(media.wantsSmartCut(smartMeta, trimCopy, media.planVideo(smartMeta, tr
 assert.ok(!media.wantsSmartCut(smartMeta, { ...trimCopy, trimStart: 0 }, media.planVideo(smartMeta, { ...trimCopy, trimStart: 0 })), 'bastan kesimde gerek yok');
 assert.ok(!media.wantsSmartCut({ ...smartMeta, videoCodec: 'hevc' }, trimCopy, media.planVideo(smartMeta, trimCopy)));
 
+// t) Sessiz kisimlari cikarma
+const log = [
+  '[silencedetect @ 0] silence_start: 2.5',
+  '[silencedetect @ 0] silence_end: 4 | silence_duration: 1.5',
+  '[silencedetect @ 0] silence_start: 10.2',
+].join('\n');
+assert.deepStrictEqual(media.parseSilenceLog(log, 12), [{ start: 2.5, end: 4 }, { start: 10.2, end: 12 }]);
+assert.deepStrictEqual(shared.keepRangesFromSilences([{ start: 2.5, end: 4 }, { start: 10.2, end: 12 }], 0, 12),
+  [{ start: 0, end: 2.65 }, { start: 3.85, end: 10.35 }]);
+// Cok kisa kalan parca (basta 0,2 sn) atilir; secim disindaki sessizlik yok sayilir
+assert.deepStrictEqual(shared.keepRangesFromSilences([{ start: 0.05, end: 1 }, { start: 8, end: 9 }], 0, 3),
+  [{ start: 0.85, end: 3 }]);
+assert.deepStrictEqual(shared.keepRangesFromSilences([], 1, 3), [{ start: 1, end: 3 }]);
+
 // r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
 assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);
 assert.strictEqual(shared.parseTimecode('01:02:03,25'), 3723.25);

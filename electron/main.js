@@ -14,6 +14,7 @@ const {
   probeVideo,
   probeImage,
   makeFilmstrip,
+  detectSilences,
   makePoster,
   planVideo,
   exportVideo,
@@ -597,6 +598,17 @@ ipcMain.handle('media:filmstrip', async (event, payload = {}) => {
   } catch {
     return null;
   }
+});
+
+ipcMain.handle('media:silences', async (event, payload = {}) => {
+  if (!engine.available) throw new Error('FFmpeg bulunamadı.');
+  const file = payload.path;
+  if (!file || !fs.existsSync(file)) throw new Error('Kaynak video bulunamadı.');
+  return detectSilences(engine, file, {
+    from: Number(payload.from) || 0,
+    to: Number(payload.to) || 0,
+    noiseDb: Number(payload.noiseDb) || -35,
+  });
 });
 
 ipcMain.handle('video:export', async (event, payload = {}) => {

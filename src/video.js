@@ -120,6 +120,8 @@
         markInBtn: document.getElementById('videoMarkInBtn'),
         markOutBtn: document.getElementById('videoMarkOutBtn'),
         segmentDetails: document.getElementById('videoSegmentDetails'),
+        silenceBtn: document.getElementById('videoSilenceBtn'),
+        silenceLevel: document.getElementById('videoSilenceLevel'),
         resetTrim: document.getElementById('videoResetTrim'),
         addSegment: document.getElementById('videoAddSegment'),
         segmentList: document.getElementById('videoSegmentList'),
@@ -265,6 +267,7 @@
       els.trimEnd.addEventListener('change', () => this.commitTrimFields());
       els.trimStart.addEventListener('keydown', (event) => { if (event.key === 'Enter') els.trimStart.blur(); });
       els.trimEnd.addEventListener('keydown', (event) => { if (event.key === 'Enter') els.trimEnd.blur(); });
+      els.silenceBtn.addEventListener('click', () => this.removeSilences());
       els.markInBtn.addEventListener('click', () => this.markIn());
       els.markOutBtn.addEventListener('click', () => this.markOut());
       els.trimMode.addEventListener('click', (event) => {
@@ -1090,6 +1093,55 @@
       const end = parse(this.els.trimEnd, this.state.outPoint);
       this.setTrim(start, end);
       this.renderTrim();
+    }
+
+    // Seçili aralıktaki sessizlikleri bulur; kalan (konuşulan) parçalar
+    // bölüm listesine yazılır ve dışa aktarmada uç uca birleştirilir.
+    async removeSilences() {
+      if (!this.state.loaded || this.silenceBusy) return;
+      if (!this.state.meta?.hasAudio) {
+        toast('Bu videoda ses yok; sessiz kısım aranamaz.', { type: 'warn' });
+        return;
+      }
+      const from = this.state.inPoint;
+      const to = this.state.outPoint;
+      const level = window.OdakShared.SILENCE_LEVELS[this.els.silenceLevel.value] || -35;
+      const file = this.state.file;
+      this.silenceBusy = true;
+      this.els.silenceBtn.disabled = true;
+      this.els.silenceBtn.classList.add('busy');
+      try {
+        const silences = await this.api.detectSilences({ path: file, from, to, noiseDb: level });
+        if (file !== this.state.file) return;
+        const keep = window.OdakShared.keepRangesFromSilences(silences, from, to);
+        const kept = keep.reduce((sum, range) => sum + (range.end - range.start), 0);
+        const removed = (to - from) - kept;
+        if (!keep.length) {
+          toast('Seçimin tamamı sessiz görünüyor. "Gürültülü ortam" yerine daha sessiz bir ayar dene.', { type: 'warn' });
+          return;
+        }
+        if (keep.length === 1 && removed < 0.5) {
+          toast('Sessiz kısım bulunamadı. Kayıt gürültülüyse "Gürültülü ortam"ı dene.', { type: 'warn' });
+          return;
+        }
+        this.remember();
+        this.state.segments = this.normalizeSegments(keep);
+        // Bölümlü kayıpsız kesim yalnızca akıllı kesimle kareye tamdır;
+        // desteklenmeyen videolarda anahtar kareye kayma, kesimleri bozardı.
+        if (this.state.quality === 'copy' && !window.OdakShared.smartCutSupported(this.state.meta)) {
+          this.setQuality('crf');
+        }
+        this.els.segmentDetails.open = true;
+        this.segmentsChanged();
+        const gaps = keep.length - 1 + (keep[0].start > from + 0.05 ? 1 : 0) + (keep[keep.length - 1].end < to - 0.05 ? 1 : 0);
+        toast(`${gaps} sessiz kısım çıkarıldı · ${formatDuration(removed)} kısaldı`, { type: 'success' });
+      } catch (error) {
+        toast(error.message || 'Sessiz kısımlar bulunamadı.', { type: 'error' });
+      } finally {
+        this.silenceBusy = false;
+        this.els.silenceBtn.disabled = false;
+        this.els.silenceBtn.classList.remove('busy');
+      }
     }
 
     // Kesim türü, kalite modunun sade yüzüdür: "Hızlı" kayıpsız kopya,

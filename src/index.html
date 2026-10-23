@@ -297,6 +297,18 @@
                     <button data-trim-mode="exact">Yeniden kodla</button>
                   </div>
                   <p class="hint" id="trimHint">Başlangıç ve bitiş tam seçtiğin yerde olur.</p>
+                  <div class="silence-tool">
+                    <div class="field-label">Sessiz kısımlar</div>
+                    <div class="silence-row">
+                      <button class="btn ghost compact" id="videoSilenceBtn" title="Seçili aralıktaki sessiz kısımları bulur ve çıkarır"><svg class="icon"><use href="#i-muted"></use></svg>Sessiz kısımları çıkar</button>
+                      <label class="field"><select id="videoSilenceLevel" title="Kaydın ortam gürültüsü">
+                        <option value="quiet">Sessiz ortam</option>
+                        <option value="normal" selected>Normal ortam</option>
+                        <option value="noisy">Gürültülü ortam</option>
+                      </select></label>
+                    </div>
+                    <p class="hint" id="videoSilenceHint">Konuşma videolarındaki boşlukları bulur; kalan parçalar bölüm listesine eklenir, istemediğini silebilirsin.</p>
+                  </div>
                   <details class="trim-more" id="videoSegmentDetails">
                     <summary><svg class="icon"><use href="#i-chevron"></use></svg>Birden çok bölüm <small>gelişmiş</small></summary>
                     <p class="hint">Videodan birkaç ayrı parçayı alıp tek dosyada birleştirmek için: her parçayı seç ve listeye ekle.</p>

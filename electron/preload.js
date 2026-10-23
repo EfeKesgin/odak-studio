@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('odak', {
   mediaUrl: (file) => invoke('media:url', file),
   poster: (payload) => invoke('media:poster', payload),
   filmstrip: (payload) => invoke('media:filmstrip', payload),
+  detectSilences: (payload) => invoke('media:silences', payload),
   exportVideo: (payload) => invoke('video:export', payload),
   mergeVideos: (payload) => invoke('video:merge', payload),
   exportGif: (payload) => invoke('gif:export', payload),
