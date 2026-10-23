@@ -80,6 +80,17 @@
     return 64;
   }
 
+  // Kesim kutularına yazılan zaman: "1:05.5", "01:02:03,25", "65" veya
+  // "65,5". Saniyeye çevrilir; anlaşılmazsa NaN döner.
+  function parseTimecode(value) {
+    const text = String(value ?? '').trim().replace(/,/g, '.');
+    if (!text) return NaN;
+    const parts = text.split(':');
+    if (parts.length > 3 || parts.some((part) => !/^\d*\.?\d*$/.test(part) || part === '' || part === '.')) return NaN;
+    if (parts.slice(0, -1).some((part) => part.includes('.'))) return NaN;
+    return parts.reduce((total, part) => total * 60 + Number(part), 0);
+  }
+
   // Hedef bir üst sınırdır: sourceVideoKbps verilirse video bit hızı kaynağın
   // üzerine çıkmaz, kısa veya düşük bit hızlı videolar şişirilmez.
   function sizeModeBitrates({ targetMB, duration, codec = 'h264', audioTracks = 0, sourceVideoKbps = 0 } = {}) {
@@ -365,6 +376,7 @@
     SIZE_MIN_VIDEO_KBPS,
     SIZE_MAX_MB,
     sizeModeBitrates,
+    parseTimecode,
     VIDEO_EXTENSIONS,
     IMAGE_EXTENSIONS,
     AUDIO_EXTENSIONS,

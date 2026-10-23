@@ -1250,6 +1250,148 @@ kbd {
   opacity: 0.45;
 }
 
+/* Kesim: oynatma konumunu başlangıç / bitiş yapan düğmeler. */
+.mark-buttons {
+  display: flex;
+  gap: 4px;
+  margin-left: 10px;
+}
+
+.mark-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 247, 93, 0.22);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mark-btn:hover {
+  background: rgba(201, 247, 93, 0.17);
+  border-color: rgba(201, 247, 93, 0.4);
+}
+
+.mark-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Köşeli parantez biçiminde başlangıç / bitiş işareti. */
+.mark-glyph {
+  width: 6px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+}
+
+.mark-glyph.in {
+  border-right: 0;
+}
+
+.mark-glyph.out {
+  border-left: 0;
+}
+
+/* Dar pencerede kesim düğmeleri sığsın: "Kare kaydet" yalnızca simge kalır. */
+@media (max-width: 1320px) {
+  #videoFrameBtn {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .mark-buttons {
+    margin-left: 4px;
+  }
+
+  .mark-btn {
+    padding: 0 9px;
+  }
+}
+
+.trim-guide {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+.trim-guide b {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+#trimStartInput,
+#trimEndInput {
+  font-family: var(--mono);
+}
+
+.trim-length {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 9px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted-2);
+  font-size: 10px;
+}
+
+.trim-length b {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.trim-more {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.045);
+  padding-top: 10px;
+}
+
+.trim-more summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.trim-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.trim-more summary small {
+  color: var(--muted-2);
+  font-weight: 500;
+  font-size: 9.5px;
+}
+
+.trim-more summary .icon {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.15s ease;
+}
+
+.trim-more[open] summary .icon {
+  transform: rotate(90deg);
+}
+
+.trim-more summary:hover {
+  color: var(--text);
+}
+
 .speed-chip {
   height: 22px;
   padding: 0 7px;
@@ -1383,18 +1525,18 @@ kbd {
   position: absolute;
   top: -2px;
   bottom: -2px;
-  width: 16px;
+  width: 22px;
   z-index: 4;
   cursor: ew-resize;
   touch-action: none;
 }
 
 .tl-handle.in {
-  left: -8px;
+  left: -11px;
 }
 
 .tl-handle.out {
-  right: -8px;
+  right: -11px;
 }
 
 .tl-handle i {
@@ -1402,7 +1544,7 @@ kbd {
   top: 2px;
   bottom: 2px;
   left: 6px;
-  width: 4px;
+  width: 10px;
   border-radius: 4px;
   background: var(--accent);
   box-shadow: 0 0 12px rgba(201, 247, 93, 0.24);
@@ -1411,11 +1553,11 @@ kbd {
 .tl-handle i::after {
   content: "";
   position: absolute;
-  left: 1px;
+  left: 4px;
   top: 50%;
   width: 2px;
-  height: 8px;
-  margin-top: -4px;
+  height: 12px;
+  margin-top: -6px;
   border-radius: 2px;
   background: rgba(17, 20, 10, 0.55);
 }

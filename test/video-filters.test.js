@@ -410,4 +410,15 @@ assert.strictEqual(media.pixelBitDepth('rgb48le'), 16);
 assert.strictEqual(media.pixelBitDepth(''), 8);
 assert.strictEqual(media.pixelBitDepth('bozuk'), 8);
 
+
+// r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
+assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);
+assert.strictEqual(shared.parseTimecode('01:02:03,25'), 3723.25);
+assert.strictEqual(shared.parseTimecode('65,5'), 65.5);
+assert.strictEqual(shared.parseTimecode('00:04.00'), 4);
+assert.ok(Number.isNaN(shared.parseTimecode('abc')));
+assert.ok(Number.isNaN(shared.parseTimecode('1::2')));
+assert.ok(Number.isNaN(shared.parseTimecode('1.5:2')));
+assert.ok(Number.isNaN(shared.parseTimecode('')));
+
 console.log('VIDEO-FILTER-TEST-OK');

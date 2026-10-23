@@ -115,6 +115,11 @@
         trimStart: document.getElementById('trimStartInput'),
         trimEnd: document.getElementById('trimEndInput'),
         trimHint: document.getElementById('trimHint'),
+        trimLength: document.getElementById('trimLength'),
+        trimMode: document.getElementById('trimModeSwitch'),
+        markInBtn: document.getElementById('videoMarkInBtn'),
+        markOutBtn: document.getElementById('videoMarkOutBtn'),
+        segmentDetails: document.getElementById('videoSegmentDetails'),
         resetTrim: document.getElementById('videoResetTrim'),
         addSegment: document.getElementById('videoAddSegment'),
         segmentList: document.getElementById('videoSegmentList'),
@@ -260,6 +265,13 @@
       els.trimEnd.addEventListener('change', () => this.commitTrimFields());
       els.trimStart.addEventListener('keydown', (event) => { if (event.key === 'Enter') els.trimStart.blur(); });
       els.trimEnd.addEventListener('keydown', (event) => { if (event.key === 'Enter') els.trimEnd.blur(); });
+      els.markInBtn.addEventListener('click', () => this.markIn());
+      els.markOutBtn.addEventListener('click', () => this.markOut());
+      els.trimMode.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-trim-mode]');
+        if (!button || button.disabled) return;
+        this.setTrimMode(button.dataset.trimMode);
+      });
 
       els.rotateLeft.addEventListener('click', () => this.rotate(-90));
       els.rotateRight.addEventListener('click', () => this.rotate(90));
@@ -868,10 +880,11 @@
         this.state.quality = 'crf';
         if (!this.reencodeNoticeShown) {
           this.reencodeNoticeShown = true;
-          toast('Görsel değişiklikler için CRF moduna geçildi. Kayıpsız mod yalnızca kesimde kullanılabilir.', { type: 'warn' });
+          toast('Görsel değişiklikler için video yeniden kodlanacak; kesim türü "Tam kesim" oldu.', { type: 'warn' });
         }
         this.renderAudio();
       }
+      this.renderTrim();
     }
 
     layoutFrame() {
@@ -1067,9 +1080,27 @@
     commitTrimFields() {
       if (!this.state.loaded) return;
       this.remember();
-      const start = parseNumber(this.els.trimStart.value, this.state.inPoint);
-      const end = parseNumber(this.els.trimEnd.value, this.state.outPoint);
+      const parse = (input, fallback) => {
+        const value = window.OdakShared.parseTimecode(input.value);
+        if (Number.isFinite(value)) return value;
+        toast('Zamanı dakika:saniye (ör. 1:05.5) ya da saniye olarak yaz.', { type: 'warn' });
+        return fallback;
+      };
+      const start = parse(this.els.trimStart, this.state.inPoint);
+      const end = parse(this.els.trimEnd, this.state.outPoint);
       this.setTrim(start, end);
+      this.renderTrim();
+    }
+
+    // Kesim türü, kalite modunun sade yüzüdür: "Hızlı" kayıpsız kopya,
+    // "Tam" yeniden kodlamadır (CRF; bit hızı/boyut modları da tamdır).
+    setTrimMode(mode) {
+      if (!this.state.loaded) return;
+      if (mode === 'fast') {
+        if (this.state.quality !== 'copy') this.setQuality('copy');
+      } else if (this.state.quality === 'copy') {
+        this.setQuality('crf');
+      }
     }
 
     renderTrim() {
@@ -1087,15 +1118,28 @@
       this.els.scaleStart.textContent = formatClock(0);
       this.els.scaleMid.textContent = formatClock(duration / 2);
       this.els.scaleEnd.textContent = formatClock(duration);
+      const forceHours = duration >= 3600;
       if (document.activeElement !== this.els.trimStart) {
-        this.els.trimStart.value = this.state.inPoint.toFixed(2);
+        this.els.trimStart.value = formatTimecode(this.state.inPoint, forceHours);
       }
       if (document.activeElement !== this.els.trimEnd) {
-        this.els.trimEnd.value = this.state.outPoint.toFixed(2);
+        this.els.trimEnd.value = formatTimecode(this.state.outPoint, forceHours);
       }
-      this.els.trimHint.textContent = this.state.quality === 'copy'
-        ? 'Kayıpsız kesim anahtar kareye hizalanır; başlangıç ve bitiş seçtiğinizden genelde 1–2 sn (bazen daha fazla) kayabilir. Tam kesim için CRF modunu kullanın.'
-        : 'Hassas kesim: seçilen aralık yeniden kodlanır, başlangıç ve bitiş tamdır.';
+      this.els.trimLength.textContent = formatTimecode(this.state.outPoint - this.state.inPoint, forceHours);
+      const fast = this.state.quality === 'copy';
+      const copyOk = this.copyAllowed();
+      this.els.trimMode.querySelectorAll('button[data-trim-mode]').forEach((button) => {
+        const isFast = button.dataset.trimMode === 'fast';
+        button.classList.toggle('active', isFast === fast);
+        button.disabled = isFast && !copyOk;
+        button.title = isFast && !copyOk
+          ? 'Kırpma, döndürme, boyut, hız veya metin varken video yeniden kodlanmak zorunda.'
+          : '';
+      });
+      this.els.trimHint.textContent = fast
+        ? 'Kalite hiç değişmez ve çok hızlıdır, ama başlangıç en yakın anahtar kareye kayabilir (genelde 1–2 sn erken).'
+        : 'Başlangıç ve bitiş tam seçtiğin yerde olur. Video yüksek kalitede yeniden kodlanır.';
+      if (this.state.segments.length) this.els.segmentDetails.open = true;
       if (Math.abs(this.state.speed - 1) > 0.0001) {
         this.els.speedChip.textContent = `${this.state.speed}×`;
         this.els.speedChip.hidden = false;

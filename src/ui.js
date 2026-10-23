@@ -18,11 +18,13 @@
   }
 
   function formatTimecode(seconds, forceHours = false) {
-    const value = Math.max(0, Number(seconds) || 0);
-    const hours = Math.floor(value / 3600);
-    const minutes = Math.floor((value % 3600) / 60);
-    const secs = Math.floor(value % 60);
-    const centis = Math.floor((value % 1) * 100);
+    // Salise üzerinden hesaplanır: 0.57 gibi değerler kayan nokta hatasıyla
+    // 00:00.56 görünmesin.
+    const total = Math.round(Math.max(0, Number(seconds) || 0) * 100);
+    const hours = Math.floor(total / 360000);
+    const minutes = Math.floor((total % 360000) / 6000);
+    const secs = Math.floor((total % 6000) / 100);
+    const centis = total % 100;
     const base = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
     if (hours > 0 || forceHours) return `${hours}:${base}`;
     return base;

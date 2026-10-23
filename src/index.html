@@ -235,6 +235,10 @@
                   <svg class="icon"><use href="#i-forward"></use></svg>
                 </button>
                 <div class="timecode"><span id="videoCurrentTime">00:00.00</span><span class="tc-sep">/</span><span id="videoTotalTime">00:00.00</span></div>
+                <div class="mark-buttons">
+                  <button class="mark-btn" id="videoMarkInBtn" title="Kesimin başlangıcını oynatma konumuna al (I)"><span class="mark-glyph in"></span>Başlangıç burası</button>
+                  <button class="mark-btn" id="videoMarkOutBtn" title="Kesimin bitişini oynatma konumuna al (O)">Bitiş burası<span class="mark-glyph out"></span></button>
+                </div>
                 <span class="grow"></span>
                 <span class="speed-chip hidden" id="videoSpeedChip">1×</span>
                 <button class="text-btn" id="videoFrameBtn" title="Bu kareyi PNG olarak kaydet">
@@ -276,14 +280,25 @@
               <div data-vpane="edit">
                 <section class="group">
                   <div class="group-head"><h3>Kesim</h3><button class="link-btn" id="videoResetTrim">Sıfırla</button></div>
+                  <p class="trim-guide">Videoyu oynat, istediğin yerde <b>Başlangıç burası</b> ve <b>Bitiş burası</b> düğmelerine bas ya da zaman çizelgesindeki tutamakları sürükle.</p>
                   <div class="field-row">
-                    <label class="field"><span>Başlangıç <small>sn</small></span><input type="number" id="trimStartInput" min="0" step="0.01" inputmode="decimal"></label>
-                    <label class="field"><span>Bitiş <small>sn</small></span><input type="number" id="trimEndInput" min="0" step="0.01" inputmode="decimal"></label>
+                    <label class="field"><span>Başlangıç</span><input type="text" id="trimStartInput" inputmode="decimal" spellcheck="false" autocomplete="off" title="Dakika:saniye (ör. 1:05.5) ya da saniye"></label>
+                    <label class="field"><span>Bitiş</span><input type="text" id="trimEndInput" inputmode="decimal" spellcheck="false" autocomplete="off" title="Dakika:saniye (ör. 1:05.5) ya da saniye"></label>
                   </div>
-                  <p class="hint" id="trimHint">Kayıpsız modda kesim en yakın anahtar kareye hizalanır.</p>
-                  <button class="btn ghost compact block segment-add" id="videoAddSegment" title="Seçili aralığı bölüm listesine ekle (B)"><svg class="icon"><use href="#i-plus"></use></svg>Seçimi bölüm olarak ekle</button>
-                  <div class="segment-list" id="videoSegmentList" hidden></div>
-                  <p class="hint" id="videoSegmentHint" hidden>Dışa aktarmada yalnızca listedeki bölümler sırayla birleştirilir. Seçim, yeni bölüm eklemek içindir.</p>
+                  <div class="trim-length"><span>Seçilen süre</span><b id="trimLength">—</b></div>
+                  <div class="field-label">Kesim türü</div>
+                  <div class="segmented" id="trimModeSwitch">
+                    <button data-trim-mode="exact">Tam kesim</button>
+                    <button data-trim-mode="fast">Hızlı · kayıpsız</button>
+                  </div>
+                  <p class="hint" id="trimHint">Başlangıç ve bitiş tam seçtiğin yerde olur.</p>
+                  <details class="trim-more" id="videoSegmentDetails">
+                    <summary><svg class="icon"><use href="#i-chevron"></use></svg>Birden çok bölüm <small>gelişmiş</small></summary>
+                    <p class="hint">Videodan birkaç ayrı parçayı alıp tek dosyada birleştirmek için: her parçayı seç ve listeye ekle.</p>
+                    <button class="btn ghost compact block segment-add" id="videoAddSegment" title="Seçili aralığı bölüm listesine ekle (B)"><svg class="icon"><use href="#i-plus"></use></svg>Seçimi bölüm olarak ekle</button>
+                    <div class="segment-list" id="videoSegmentList" hidden></div>
+                    <p class="hint" id="videoSegmentHint" hidden>Dışa aktarmada yalnızca listedeki bölümler sırayla birleştirilir. Seçim, yeni bölüm eklemek içindir.</p>
+                  </details>
                 </section>
 
                 <section class="group">
