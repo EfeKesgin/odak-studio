@@ -93,13 +93,16 @@
 
   // Hedef bir üst sınırdır: sourceVideoKbps verilirse video bit hızı kaynağın
   // üzerine çıkmaz, kısa veya düşük bit hızlı videolar şişirilmez.
-  function sizeModeBitrates({ targetMB, duration, codec = 'h264', audioTracks = 0, sourceVideoKbps = 0 } = {}) {
+  function sizeModeBitrates({ targetMB, duration, codec = 'h264', audioTracks = 0, sourceVideoKbps = 0, sourceAudioKbps = 0 } = {}) {
     const targetBytes = Math.max(0, Number(targetMB) || 0) * 1e6;
     const seconds = Math.max(0.001, Number(duration) || 0);
     const safety = SIZE_SAFETY[codec] || 0.95;
     const tracks = Math.max(0, Math.round(Number(audioTracks) || 0));
     const totalKbps = (targetBytes * 8 * safety) / seconds / 1000;
-    const audioKbps = tracks ? sizeAudioKbps(totalKbps) : 0;
+    let audioKbps = tracks ? sizeAudioKbps(totalKbps) : 0;
+    // Ses de kaynaktan yüksek kodlanmaz (64 kbps altına inilmez).
+    const sourceAudio = Math.round(Number(sourceAudioKbps) || 0);
+    if (audioKbps && sourceAudio > 0) audioKbps = Math.min(audioKbps, Math.max(64, Math.ceil(sourceAudio / 16) * 16));
     let videoKbps = Math.floor(totalKbps - audioKbps * tracks);
     const sourceCap = Math.round(Number(sourceVideoKbps) || 0);
     const capped = sourceCap >= SIZE_MIN_VIDEO_KBPS && videoKbps > sourceCap;

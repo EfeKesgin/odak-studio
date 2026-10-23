@@ -1548,6 +1548,7 @@
         codec: this.state.codec,
         audioTracks,
         sourceVideoKbps: ((Number(meta?.videoBitrate) || 0) / 1000) * Math.max(0.25, this.state.speed),
+        sourceAudioKbps: (Number(meta?.audioBitrate) || 0) / 1000,
       });
     }
 
@@ -1564,9 +1565,14 @@
       const passes = this.gpuVendor()
         ? 'Ekran kartının çok geçişli modunda kodlanır'
         : 'İki geçişte kodlanır';
-      this.els.sizeHint.textContent = rates.feasible
-        ? `Video ~${window.OdakUI.formatNumber(rates.videoKbps)} kbps${audioPart}. ${passes}; çıktı hedefin altında kalır.${rates.capped ? ' Kaynak bu hedeften küçük olduğu için bit hızı artırılmaz.' : ''}`
-        : `${passes}; çıktı hedefin altında kalır.`;
+      const meta = this.state.meta;
+      const sourcePart = meta.duration > 0 ? (meta.size * this.getOutputDuration()) / meta.duration : Infinity;
+      const fitsAsCopy = this.copyAllowed() && sourcePart <= this.state.targetMB * 1e6 * 0.95;
+      this.els.sizeHint.textContent = fitsAsCopy
+        ? 'Bu bölüm zaten hedefe sığıyor: yeniden kodlanmadan, kalite kaybı olmadan kopyalanır.'
+        : rates.feasible
+          ? `Video ~${window.OdakUI.formatNumber(rates.videoKbps)} kbps${audioPart}. ${passes}; çıktı hedefin altında kalır.${rates.capped ? ' Kaynak bu hedeften küçük olduğu için bit hızı artırılmaz.' : ''}`
+          : `${passes}; çıktı hedefin altında kalır.`;
       let warning = '';
       if (!rates.feasible) {
         warning = `Hedef bu süre için çok küçük. En az ${window.OdakUI.formatNumber(rates.minMB)} MB seçin, videoyu kısaltın veya sesi kapatın.`;

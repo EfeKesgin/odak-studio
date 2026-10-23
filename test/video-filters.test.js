@@ -411,6 +411,19 @@ assert.strictEqual(media.pixelBitDepth(''), 8);
 assert.strictEqual(media.pixelBitDepth('bozuk'), 8);
 
 
+// Ses de kaynaktan yuksek kodlanmaz
+const lowAudio = shared.sizeModeBitrates({ targetMB: 10, duration: 60, audioTracks: 1, sourceAudioKbps: 70 });
+assert.strictEqual(lowAudio.audioKbps, 80);
+// Kaynak hedefe sigiyorsa ve gorsel degisiklik yoksa kopyalanir
+const fitMeta = { ...meta8, ext: 'mp4', size: 3e6, duration: 20 };
+const fitOptions = { mode: 'size', codec: 'h264', audioMode: 'original', speed: 1, targetMB: 10, trimStart: 0, trimEnd: 20 };
+assert.ok(media.sizeFitsAsCopy(fitMeta, fitOptions, media.planVideo(fitMeta, fitOptions)));
+assert.ok(!media.sizeFitsAsCopy({ ...fitMeta, size: 30e6 }, fitOptions, media.planVideo(fitMeta, fitOptions)));
+assert.ok(!media.sizeFitsAsCopy(fitMeta, { ...fitOptions, rotation: 90 }, media.planVideo(fitMeta, fitOptions)));
+// Kopyalanan seste anahtar kare beklenmez (bazi MKV kayitlarinda ses kayboluyordu)
+const audioCopyArgs = media.buildVideoArgs('in.mkv', meta8, { ...fitOptions, mode: 'copy' }, 'out.mp4', media.planVideo(fitMeta, { ...fitOptions, mode: 'copy' })).args;
+assert.ok(audioCopyArgs.includes('-copyinkf:a'));
+
 // r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
 assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);
 assert.strictEqual(shared.parseTimecode('01:02:03,25'), 3723.25);

@@ -313,6 +313,7 @@
     'İki geçişte kodlanır': 'Encoded in two passes',
     'Ekran kartının çok geçişli modunda kodlanır': 'Encoded in the GPU multipass mode',
     'çıktı hedefin altında kalır.': 'the output stays under the target.',
+    'Bu bölüm zaten hedefe sığıyor: yeniden kodlanmadan, kalite kaybı olmadan kopyalanır.': 'This part already fits the target: it is copied without re-encoding or quality loss.',
     'Kaynak bu hedeften küçük olduğu için bit hızı artırılmaz.': 'The source is already smaller than the target, so the bitrate is not raised.',
     'Bu boyutta kalite belirgin düşer. Çözünürlüğü küçültmek daha iyi sonuç verir.': 'Quality drops noticeably at this size. Reducing the resolution gives better results.',
     'Kırpma, döndürme, boyut veya hız değişikliği varken kayıpsız kopyalama kullanılamaz.': 'Lossless copy is unavailable while there is a crop, rotation, resize or speed change.',

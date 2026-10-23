@@ -650,7 +650,7 @@ ipcMain.handle('video:export', async (event, payload = {}) => {
       height: outputMeta?.height || null,
       bitrate: outputMeta?.overallBitrate || null,
       elapsedMs: Date.now() - job.startedAt,
-      copied: options.mode === 'copy',
+      copied: options.mode === 'copy' || Boolean(result.keptSource),
       hwVendor: options.hwVendor || null,
       targetBytes: result.targetBytes || null,
       overTarget: Boolean(result.overTarget),

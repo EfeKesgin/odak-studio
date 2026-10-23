@@ -740,6 +740,7 @@ function planSizeMode(meta, options, plan) {
     codec,
     audioTracks: sizeAudioTrackCount(meta, options),
     sourceVideoKbps: ((Number(meta.videoBitrate) || 0) / 1000) * clamp(Number(options.speed) || 1, 0.25, 4),
+    sourceAudioKbps: (Number(meta.audioBitrate) || 0) / 1000,
   });
   if (!(rates.targetBytes > 0)) throw new Error('Geçerli bir hedef dosya boyutu girin.');
   if (!rates.feasible) {
@@ -799,7 +800,9 @@ function videoEncoderArgs({
 
 function audioEncoderArgs(audio) {
   if (!audio.enabled) return [];
-  if (audio.codec === 'copy') return ['-c:a', 'copy'];
+  // -copyinkf:a: bazı MKV kayıtlarında ses paketleri "anahtar kare" diye
+  // işaretlenmez; kopyalarken FFmpeg anahtar kare bekleyip sesi hiç yazmıyordu.
+  if (audio.codec === 'copy') return ['-c:a', 'copy', '-copyinkf:a'];
   return ['-c:a', audio.codec, ...(audio.bitrate ? ['-b:a', audio.bitrate] : [])];
 }
 
@@ -1066,10 +1069,31 @@ function runFfmpegProcess(engine, args, { duration, onProgress, signal, cwd } = 
   });
 }
 
+// Hedef boyut modunda kaynak zaten hedefe sığıyor ve görsel değişiklik yoksa
+// yeniden kodlamak yalnızca kaliteyi düşürür (çoğu zaman dosyayı da büyütür):
+// o aralık kayıpsız kopyalanır.
+function sizeFitsAsCopy(meta, options, plan) {
+  if (options.mode !== 'size' || !isCopyAllowed(options)) return false;
+  if (!['original', 'none'].includes(options.audioMode || 'original')) return false;
+  if (copyContainer(meta) !== plan.container) return false;
+  const duration = Number(meta.duration) || 0;
+  const size = Number(meta.size) || 0;
+  const targetBytes = (Number(options.targetMB) || 0) * 1e6;
+  if (!(duration > 0 && size > 0 && targetBytes > 0)) return false;
+  return (size * plan.sourceDuration) / duration <= targetBytes * 0.95;
+}
+
 async function exportVideo(engine, sourcePath, meta, options, tempPath, plan, { onProgress, signal } = {}) {
   // Yollar mutlak olmalı: metin/altyazı varsa FFmpeg iş klasöründe çalışır.
   const input = path.resolve(sourcePath);
   const output = path.resolve(tempPath);
+  if (sizeFitsAsCopy(meta, options, plan)) {
+    const copyOptions = { ...options, mode: 'copy' };
+    const copied = await exportVideo(engine, input, meta, copyOptions, output, planVideo(meta, copyOptions), { onProgress, signal });
+    const targetBytes = (Number(options.targetMB) || 0) * 1e6;
+    if (copied.size <= targetBytes) return { ...copied, targetBytes, overTarget: false, keptSource: true };
+    // Anahtar kare payı hedefi aştırdıysa normal hedef boyut kodlamasına geçilir.
+  }
   const overlay = options.mode === 'copy'
     ? null
     : await prepareOverlays(engine, input, meta, options, geometryOutputSize(meta, options));
@@ -1238,7 +1262,7 @@ async function exportMerge(engine, inputs, metas, settings, outputPath, { onProg
     ];
     if (plan.hasAudio) args.push('-map', '0:a?');
     else args.push('-an');
-    args.push('-sn', '-dn', '-c', 'copy', '-map_chapters', '-1');
+    args.push('-sn', '-dn', '-c', 'copy', '-copyinkf:a', '-map_chapters', '-1');
     if (plan.container === 'mp4' || plan.container === 'mov') args.push('-movflags', '+faststart');
     args.push(output);
     await runFfmpegProcess(engine, args, { cwd: dir, duration: plan.duration, onProgress, signal });
@@ -1378,6 +1402,7 @@ module.exports = {
   prepareOverlays,
   overlayFilters,
   planSizeMode,
+  sizeFitsAsCopy,
   pickSubtitleStrategy,
   exportVideo,
   saveFrame,
