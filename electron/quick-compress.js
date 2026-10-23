@@ -48,7 +48,10 @@ function quickCompressOptions(meta, presetId, { encoder = 'cpu' } = {}) {
   const width = Number(meta.width) || 0;
   const height = Number(meta.height) || 0;
   const longEdge = Math.max(width, height);
-  if (settings.maxEdge && longEdge > settings.maxEdge) {
+  // Video hedefe zaten sığıyorsa çözünürlüğe de dokunulmaz: olduğu gibi
+  // kopyalanır (hedef boyut modu bunu kendisi seçer).
+  const fits = Number(meta.size) > 0 && Number(meta.size) <= (settings.targetMB || 0) * 1e6 * 0.95;
+  if (settings.maxEdge && longEdge > settings.maxEdge && !fits) {
     const factor = settings.maxEdge / longEdge;
     resize = { width: even(width * factor), height: even(height * factor) };
   }

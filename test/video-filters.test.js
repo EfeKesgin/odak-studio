@@ -471,6 +471,8 @@ assert.strictEqual(portrait.resize, null, 'kucuk video buyutulmez');
 assert.strictEqual(portrait.audioMode, 'none');
 assert.strictEqual(quick.quickCompressOptions({ width: 3840, height: 2160, duration: 9 }, 'email').resize, null, 'e-posta ayarinda boyut siniri yok');
 assert.strictEqual(quick.quickCompressBaseName('C:/v/tatil.mp4', 'email'), 'tatil-eposta');
+assert.strictEqual(quick.quickCompressOptions({ width: 1920, height: 1080, duration: 30, size: 13e6 }, 'whatsapp').resize, null,
+  'hedefe zaten sigan video kucultulmez, kopyalanir');
 
 // r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
 assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);

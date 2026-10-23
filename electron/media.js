@@ -735,12 +735,18 @@ function sizeAudioTrackCount(meta, options) {
 function planSizeMode(meta, options, plan) {
   const codec = options.codec || 'h264';
   if (codec === 'prores') throw new Error('ProRes hedef dosya boyutu modunu desteklemez.');
+  // Bit hızı tavanı çözünürlükle orantılıdır: küçültülen görüntüye kaynağın
+  // tam bit hızını vermek dosyayı boşuna büyük tutardı.
+  const out = geometryOutputSize(meta, options);
+  const pixelRatio = meta.width > 0 && meta.height > 0 && out.width > 0 && out.height > 0
+    ? Math.min(1, (out.width * out.height) / (meta.width * meta.height))
+    : 1;
   const rates = shared.sizeModeBitrates({
     targetMB: options.targetMB,
     duration: plan.duration,
     codec,
     audioTracks: sizeAudioTrackCount(meta, options),
-    sourceVideoKbps: ((Number(meta.videoBitrate) || 0) / 1000) * clamp(Number(options.speed) || 1, 0.25, 4),
+    sourceVideoKbps: ((Number(meta.videoBitrate) || 0) / 1000) * clamp(Number(options.speed) || 1, 0.25, 4) * pixelRatio,
     sourceAudioKbps: (Number(meta.audioBitrate) || 0) / 1000,
   });
   if (!(rates.targetBytes > 0)) throw new Error('Geçerli bir hedef dosya boyutu girin.');
