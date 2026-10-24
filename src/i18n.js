@@ -324,6 +324,8 @@
     'Görsel değişiklikler için video yeniden kodlanacak; kesim türü "Yeniden kodla" oldu.': 'Visual edits need re-encoding; the cut type is now "Re-encode".',
     'Yeniden kodla': 'Re-encode',
     'Sessiz kısımlar': 'Silent parts',
+    'Çevrimdışı · internet gelince kendiliğinden denetlenir': 'Offline · checks automatically when you are back online',
+    'Denetlenemedi · daha sonra yeniden denenecek': 'Could not check · will retry later',
     'Kaliteyi koru · küçült': 'Keep quality · shrink',
     'Kaliteyi koru': 'Keep quality',
     'Zaten verimli sıkıştırılmış; daha küçük olmuyor, yeni dosya oluşturulmadı.': 'Already efficiently compressed; it does not get smaller, so no new file was created.',

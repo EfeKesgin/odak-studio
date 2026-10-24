@@ -479,6 +479,21 @@ assert.deepStrictEqual(quick.compressRequestFromArgs(['odak.exe', '--compress=qu
 assert.strictEqual(quick.quickCompressOptions({ width: 1920, height: 1080, duration: 30, size: 13e6 }, 'whatsapp').resize, null,
   'hedefe zaten sigan video kucultulmez, kopyalanir');
 
+// v) Otomatik guncelleme: cevrimdisi calisir, internet gelince yeniden dener
+const policy = require('../electron/update-policy.js');
+const HOUR = 60 * 60 * 1000;
+assert.strictEqual(policy.shouldCheck({ state: 'idle', online: false, now: 10 * HOUR }), false, 'internet yokken istek yok');
+assert.strictEqual(policy.shouldCheck({ state: 'idle', online: true, now: 10 * HOUR }), true, 'ilk denetim');
+assert.strictEqual(policy.shouldCheck({ state: 'offline', online: true, now: 10 * HOUR, lastAttempt: 10 * HOUR - 60000 }), false, '1 dk once denendi');
+assert.strictEqual(policy.shouldCheck({ state: 'offline', online: true, now: 10 * HOUR, lastAttempt: 9 * HOUR }), true, 'internet geldi, yeniden dene');
+assert.strictEqual(policy.shouldCheck({ state: 'none', online: true, now: 10 * HOUR, lastSuccess: 7 * HOUR }), false, '3 saat once guncel');
+assert.strictEqual(policy.shouldCheck({ state: 'none', online: true, now: 10 * HOUR, lastSuccess: 3 * HOUR }), true, '6 saat gecti');
+assert.strictEqual(policy.shouldCheck({ state: 'downloading', online: true, now: 10 * HOUR }), false);
+assert.strictEqual(policy.shouldCheck({ state: 'downloaded', online: true, now: 10 * HOUR }), false);
+assert.ok(policy.isNetworkError(new Error('net::ERR_INTERNET_DISCONNECTED')));
+assert.ok(policy.isNetworkError({ code: 'ENOTFOUND', message: 'getaddrinfo ENOTFOUND github.com' }));
+assert.ok(!policy.isNetworkError(new Error('Cannot find latest.yml in the latest release artifacts')));
+
 // r) Kesim kutusundaki zaman: dakika:saniye, saat ve virgullu saniye
 assert.strictEqual(shared.parseTimecode('1:05.5'), 65.5);
 assert.strictEqual(shared.parseTimecode('01:02:03,25'), 3723.25);

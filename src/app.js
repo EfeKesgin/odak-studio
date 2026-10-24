@@ -715,7 +715,8 @@
       case 'downloading': return `Sürüm ${status.version || ''} indiriliyor · %${status.percent || 0}`.replace('  ', ' ');
       case 'downloaded': return `Sürüm ${status.version} hazır · yeniden başlatınca kurulur`;
       case 'none': return 'Güncel';
-      case 'error': return 'Denetlenemedi (çevrimdışı olabilirsin)';
+      case 'offline': return 'Çevrimdışı · internet gelince kendiliğinden denetlenir';
+      case 'error': return 'Denetlenemedi · daha sonra yeniden denenecek';
       case 'idle': return 'Bekleniyor';
       default: return 'Geliştirme sürümünde kapalı';
     }

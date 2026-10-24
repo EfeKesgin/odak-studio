@@ -78,7 +78,7 @@ ok(`getElementById referanslari (${idRefs} adet)`);
 // 6) UTF-8 gecerliligi
 const files = [
   'package.json', 'README.md', '.gitignore', 'scripts/prepare-ffmpeg.js', 'scripts/publish-release.js',
-  'installer/open-with.nsh', 'electron/main.js', 'electron/quick-compress.js', 'electron/logger.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
+  'installer/open-with.nsh', 'electron/main.js', 'electron/quick-compress.js', 'electron/update-policy.js', 'electron/logger.js', 'electron/media.js', 'electron/photos.js', 'electron/gif.js', 'electron/util.js', 'electron/preload.js',
   'src/index.html', 'src/compress.html', 'src/compress.js', 'src/styles.css', 'src/ui.js', 'src/crop.js', 'src/text-layers.js', 'src/video.js', 'src/photo.js', 'src/gif.js',
   'src/i18n.js', 'src/shared.js', 'src/batch-plan.js', 'src/batch.js', 'src/app.js',
   'test/i18n.test.js',

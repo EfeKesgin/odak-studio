@@ -1,7 +1,7 @@
 'use strict';
 
 const {
-  app, BrowserWindow, ipcMain, dialog, shell, Menu, screen,
+  app, BrowserWindow, ipcMain, dialog, shell, Menu, screen, net, powerMonitor,
 } = require('electron');
 const fs = require('node:fs');
 const fsp = fs.promises;
@@ -47,6 +47,7 @@ const { t, setLanguage, languageForLocale } = require('../src/i18n.js');
 
 const log = require('./logger');
 const { compressRequestFromArgs, quickCompressOptions, quickCompressBaseName } = require('./quick-compress');
+const updatePolicy = require('./update-policy');
 
 function applyLanguage() {
   setLanguage(config.preferences?.ui?.language || languageForLocale(app.getLocale()));
@@ -1127,30 +1128,80 @@ function setupAutoUpdate() {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on('checking-for-update', () => sendUpdateStatus({ state: 'checking' }));
-  autoUpdater.on('update-not-available', () => sendUpdateStatus({ state: 'none', version: app.getVersion() }));
-  autoUpdater.on('update-available', (info) => sendUpdateStatus({ state: 'available', version: info.version }));
+  autoUpdater.on('update-not-available', () => {
+    updateLastSuccess = Date.now();
+    sendUpdateStatus({ state: 'none', version: app.getVersion(), checkedAt: updateLastSuccess });
+  });
+  autoUpdater.on('update-available', (info) => {
+    updateLastSuccess = Date.now();
+    sendUpdateStatus({ state: 'available', version: info.version });
+  });
   autoUpdater.on('download-progress', (progress) => sendUpdateStatus({
     state: 'downloading',
     version: updateStatus.version,
     percent: Math.round(progress.percent || 0),
   }));
   autoUpdater.on('update-downloaded', (info) => sendUpdateStatus({ state: 'downloaded', version: info.version }));
-  // Çevrimdışıyken veya sunucu yanıt vermezken uygulama sessizce çalışmaya devam eder.
-  autoUpdater.on('error', (error) => sendUpdateStatus({ state: 'error', message: String(error?.message || error).split('\n')[0] }));
+  // Çevrimdışıyken veya sunucu yanıt vermezken uygulama sessizce çalışmaya
+  // devam eder; bağlantı hataları "çevrimdışı" sayılır ve sonra yeniden denenir.
+  autoUpdater.on('error', (error) => sendUpdateStatus(updateFailure(error)));
   updateStatus = { state: 'idle' };
-  // Açılışı yavaşlatmamak için biraz sonra denetle.
-  setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 8000);
+  // Açılışı yavaşlatmamak için biraz sonra; sonra her 30 dakikada bir
+  // gerekiyorsa (6 saat geçtiyse ya da önceki deneme çevrimdışıydıysa).
+  setTimeout(() => maybeCheckForUpdates(), 8000);
+  setInterval(() => maybeCheckForUpdates(), updatePolicy.TICK_MS).unref?.();
+  powerMonitor.on('resume', () => setTimeout(() => maybeCheckForUpdates(), 15000));
+}
+
+let updateLastSuccess = 0;
+let updateLastAttempt = 0;
+
+function updateFailure(error) {
+  const message = String(error?.message || error).split('\n')[0];
+  return updatePolicy.isNetworkError(error) ? { state: 'offline' } : { state: 'error', message };
+}
+
+function isOnline() {
+  try {
+    return typeof net.isOnline === 'function' ? net.isOnline() : true;
+  } catch {
+    return true;
+  }
+}
+
+async function runUpdateCheck() {
+  if (!isOnline()) {
+    sendUpdateStatus({ state: 'offline' });
+    return;
+  }
+  updateLastAttempt = Date.now();
+  try {
+    await autoUpdater.checkForUpdates();
+  } catch (error) {
+    sendUpdateStatus(updateFailure(error));
+  }
+}
+
+function maybeCheckForUpdates() {
+  if (!autoUpdater) return;
+  const due = updatePolicy.shouldCheck({
+    state: updateStatus.state,
+    online: isOnline(),
+    now: Date.now(),
+    lastSuccess: updateLastSuccess,
+    lastAttempt: updateLastAttempt,
+  });
+  if (due) runUpdateCheck();
+  else if (!isOnline() && !['available', 'downloading', 'downloaded'].includes(updateStatus.state)) {
+    sendUpdateStatus({ state: 'offline' });
+  }
 }
 
 ipcMain.handle('update:status', async () => updateStatus);
 
 ipcMain.handle('update:check', async () => {
   if (!autoUpdater) return updateStatus;
-  try {
-    await autoUpdater.checkForUpdates();
-  } catch (error) {
-    sendUpdateStatus({ state: 'error', message: String(error?.message || error).split('\n')[0] });
-  }
+  await runUpdateCheck();
   return updateStatus;
 });
 
