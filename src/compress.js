@@ -95,7 +95,7 @@
     title.textContent = busy
       ? (items.length > 1 ? 'Videolar küçültülüyor' : 'Video küçültülüyor')
       : failed ? 'Bazı dosyalar küçültülemedi' : 'Hazır';
-    document.title = title.textContent;
+    document.title = i18n.t(title.textContent);
   }
 
   async function start() {

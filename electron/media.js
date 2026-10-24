@@ -19,6 +19,14 @@ const shared = require('../src/shared.js');
 const VIDEO_EXTENSIONS = new Set(shared.VIDEO_EXTENSIONS.map((ext) => `.${ext}`));
 const IMAGE_EXTENSIONS = new Set(shared.IMAGE_EXTENSIONS.map((ext) => `.${ext}`));
 
+// Bazı indirilmiş videolarda (ör. TikTok indiricileri) gerçek karelerin
+// yanında içi boş "çöp" paketler olur; oynatıcılar bunları atlar. FFmpeg ise
+// kod çözme hatası oranı 2/3'ü geçince işi başarısız sayıyordu. Kareler
+// sağlam çözüldüğü sürece bu hatalar yok sayılır.
+function tolerant(args) {
+  return ['-max_error_rate', '1', ...args];
+}
+
 function isVideoPath(file) {
   return VIDEO_EXTENSIONS.has(path.extname(file).toLowerCase());
 }
@@ -294,7 +302,7 @@ function buildFilmstripArgs(input, duration, outputPath, frames = FILMSTRIP_FRAM
 
 async function makeFilmstrip(engine, input, duration, outputPath) {
   try {
-    await execFileAsync(engine.ffmpeg, buildFilmstripArgs(input, duration, outputPath));
+    await execFileAsync(engine.ffmpeg, tolerant(buildFilmstripArgs(input, duration, outputPath)));
     if (await exists(outputPath)) return;
   } catch {
     // Bazı kapsayıcılarda atlama başarısız olabilir; tüm videoyu tarayan
@@ -312,7 +320,7 @@ async function makeFilmstrip(engine, input, duration, outputPath) {
     '-q:v', '5',
     outputPath,
   ];
-  await execFileAsync(engine.ffmpeg, args);
+  await execFileAsync(engine.ffmpeg, tolerant(args));
   if (!(await exists(outputPath))) throw new Error('Film şeridi oluşturulamadı.');
 }
 
@@ -326,7 +334,7 @@ async function makePoster(engine, input, time, outputPath) {
     '-q:v', '3',
     outputPath,
   ];
-  await execFileAsync(engine.ffmpeg, args);
+  await execFileAsync(engine.ffmpeg, tolerant(args));
   if (!(await exists(outputPath))) throw new Error('Önizleme karesi oluşturulamadı.');
 }
 
@@ -1009,7 +1017,7 @@ function runFfmpegProcess(engine, args, { duration, onProgress, signal, cwd } = 
         etaSeconds: eta,
       });
     };
-    const proc = spawn(engine.ffmpeg, args, {
+    const proc = spawn(engine.ffmpeg, tolerant(args), {
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
       ...(cwd ? { cwd } : {}),
@@ -1372,7 +1380,7 @@ async function detectSilences(engine, input, { from = 0, to = 0, noiseDb = -35, 
   if (to > from) args.push('-t', (to - from).toFixed(6));
   args.push('-i', input, '-map', '0:a:0', '-vn', '-sn', '-dn',
     '-af', `silencedetect=noise=${Math.round(noiseDb)}dB:d=${Number(minSeconds).toFixed(2)}`, '-f', 'null', nullOutput());
-  const { stderr } = await execFileAsync(engine.ffmpeg, args, { signal, maxBuffer: 64 * 1024 * 1024 });
+  const { stderr } = await execFileAsync(engine.ffmpeg, tolerant(args), { signal, maxBuffer: 64 * 1024 * 1024 });
   // -ss ile zamanlar seçimin başından sayılır; videonun zamanına çevrilir.
   return parseSilenceLog(stderr, to > from ? to - from : 0)
     .map((item) => ({ start: item.start + from, end: item.end + from }));
