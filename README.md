@@ -27,13 +27,14 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
 | **Sessiz kısımları çıkar** | Konuşma videolarındaki boşlukları tek tıkla bulur ve keser; kalan parçalar listede, istemediğini silersin. |
 | **Video** | Çok bölümlü kesim, kırpma, döndürme, boyutlandırma, hız. H.264 / H.265 / VP9 / ProRes. |
 | **Hedef boyut** | "Bu video 10 MB olsun" de, gerisini o halletsin: Discord, WhatsApp, e-posta için hazır ayarlar. Zaten küçük video büyütülmez, kalite kaybı olmadan kopyalanır. |
-| **Sağ tıkla küçült** | Gezginde videoya sağ tık → **Odak ile küçült → Discord / WhatsApp / E-posta**. Editör açılmadan küçültülür, yeni dosya asıl dosyanın yanına kaydedilir. |
+| **Sağ tıkla küçült** | Gezginde videoya sağ tık → **Odak ile küçült**. Editör açılmadan küçültülür, yeni dosya asıl dosyanın yanına kaydedilir. **Kaliteyi koru**: çözünürlük aynı kalır, şişkin videolar gözle fark edilmeden genelde yarıya iner. **Discord / WhatsApp / E-posta**: dosya o sınıra sığdırılır. |
 | **Metin ve altyazı** | Videoya, fotoğrafa ve GIF'e yazı veya filigran; altyazıyı videoya yakma. |
 | **Hız** | NVIDIA, Intel ve AMD ekran kartlarıyla birkaç kat daha hızlı kodlama (varsa). |
 | **Fotoğraf** | Kırp, döndür, boyutlandır; JPEG, PNG, WebP, AVIF, TIFF. Renk profili ve EXIF korunur. |
 | **GIF** | Video ve fotoğraflardan GIF; klip sırası, kırpma, hız, FPS, üst/alt yazı. |
 | **Toplu işlem** | Yüzlerce dosyayı aynı ayarla dönüştür; videoları tek dosyada birleştir. |
 | **Kolay kullanım** | Gezginde sağ tık → **Birlikte aç → Odak Studio**; geri al / yinele (Ctrl+Z / Ctrl+Y). |
+| **Güncellemeler** | Yeni sürüm arka planda iner, kapatınca kurulur. İnternet yoksa uygulama aynen çalışır; bağlanınca kendiliğinden denetler. |
 | **Dil** | Türkçe ve İngilizce arayüz. |
 
 <table>
@@ -59,8 +60,8 @@ Kurulum yeter; hesap, reklam, filigran veya abonelik yok. Dosyaların bilgisayar
 
 - **Açık kaynak:** Kodun tamamı bu sayfada; ne yaptığını herkes görebilir ve denetleyebilir.
 - **İnternete bir şey göndermez:** Tüm işlemler senin bilgisayarında yapılır. Uygulamanın
-  internete tek bağlantısı, açılışta GitHub'da yeni sürüm olup olmadığına bakmaktır (internet
-  yoksa uygulama normal çalışır).
+  internete tek bağlantısı, GitHub'da yeni sürüm olup olmadığına bakmaktır (açılışta ve
+  açık kaldıkça birkaç saatte bir). İnternet yoksa hiç istek atılmaz, uygulama normal çalışır.
 - **Gizli ücret yok:** Deneme süresi, filigran, kısıtlı özellik veya hesap yok.
 - **Sorun olursa:** Yardım → **Hata kaydını aç** ile oluşan kayıt dosyasını bir
   [sorun bildirimi](https://github.com/EfeKesgin/odak-studio/issues) ile paylaşabilirsin. Kayıt
@@ -78,7 +79,8 @@ sayfadaki [Sürümler](https://github.com/EfeKesgin/odak-studio/releases) bölü
 **Odak Studio** is a free, open-source, quality-first video, photo and GIF studio for Windows.
 Smart cut (lossless *and* frame-exact trimming: only the first 1–2 seconds up to the next
 keyframe are re-encoded), one-click silence removal, target file size (e.g. "fit into 10 MB"),
-"Shrink with Odak" in the Explorer right-click menu, multi-segment cuts, text and watermarks,
+"Shrink with Odak" in the Explorer right-click menu (keep quality at the same resolution, or fit
+Discord / WhatsApp / email limits), offline-friendly automatic updates, multi-segment cuts, text and watermarks,
 subtitle burn-in, GPU encoding (NVENC / Quick Sync / AMF), batch conversion and video merging.
 Everything runs locally; no account, ads or watermarks. The interface is available in English and
 Turkish (language button in the sidebar).
@@ -110,8 +112,16 @@ Aşağıdaki bölümler projeyi kaynaktan çalıştırmak, paketlemek ve katkıd
 - **Sessiz kısımlar:** FFmpeg `silencedetect` (yalnızca ses çözülür); her boşluğun iki yanında
   0,15 sn pay kalır ve kalan parçalar bölüm listesine yazılır.
 - **Odak ile küçült:** Kurulum, video uzantılarının `SystemFileAssociations` anahtarına bir alt
-  menü ekler (dosya ilişkileri değişmez); uygulama `--compress=discord|whatsapp|email` ile açılır
-  ve editör yerine küçük bir kuyruk penceresi gösterir (`electron/quick-compress.js`).
+  menü ekler (dosya ilişkileri değişmez, komutlar kurulumda seçilen klasörü gösterir); uygulama
+  `--compress=quality|discord|whatsapp|email` ile açılır ve editör yerine küçük bir kuyruk
+  penceresi gösterir (`electron/quick-compress.js`). "Kaliteyi koru" H.264 CRF 20'dir; sonuç
+  kaynaktan belirgin küçük değilse yeni dosya bırakılmaz.
+- **Otomatik güncelleme:** electron-updater + GitHub Releases. İnternet yokken (`net.isOnline`)
+  istek atılmaz, bağlantı hataları "çevrimdışı" sayılır; her 30 dakikada bir, son başarılı
+  denetimden 6 saat geçtiyse ya da önceki deneme çevrimdışıydıysa yeniden denetlenir
+  (`electron/update-policy.js`).
+- **Bozuk paketli indirmeler:** Bazı indirilmiş videolardaki boş paketler yüzünden FFmpeg'in
+  işi bırakmaması için tüm çağrılar `-max_error_rate 1` ile çalışır.
 - **Metin katmanları:** Video ve GIF'te libass (ASS), fotoğrafta SVG ile çizilir; önizleme ile
   çıktının aynı görünmesi için yazı tipi oranları ölçülerek ayarlanmıştır.
 - **Donanım kodlama:** Açılışta her GPU kodlayıcı gerçek bir deneme kodlamasıyla test edilir;
