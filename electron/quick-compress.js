@@ -11,8 +11,8 @@ const fs = require('node:fs');
 const shared = require('../src/shared.js');
 
 // Sağ tık menüsündeki ayarlar; sıra menüdeki sıradır.
-const QUICK_PRESETS = ['discord', 'whatsapp', 'email'];
-const SUFFIX = { discord: 'discord', whatsapp: 'whatsapp', email: 'eposta' };
+const QUICK_PRESETS = ['quality', 'discord', 'whatsapp', 'email'];
+const SUFFIX = { quality: 'odak', discord: 'discord', whatsapp: 'whatsapp', email: 'eposta' };
 
 function even(value) {
   return Math.max(2, Math.round(value / 2) * 2);

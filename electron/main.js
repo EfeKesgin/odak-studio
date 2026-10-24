@@ -745,6 +745,16 @@ async function runCompressItem(item) {
         sendCompressState(false);
       },
     });
+    // "Kaliteyi koru": video zaten verimli sıkıştırılmışsa yeniden kodlamak
+    // kazanç getirmez; işe yaramaz bir kopya bırakılmaz.
+    if (options.mode === 'crf' && result.size >= meta.size * 0.95) {
+      await fsp.rm(tempPath, { force: true }).catch(() => {});
+      tempPath = null;
+      item.alreadyEfficient = true;
+      item.percent = 100;
+      item.status = 'done';
+      return;
+    }
     await fsp.rename(tempPath, outputPath);
     tempPath = null;
     rememberOutput(outputPath);

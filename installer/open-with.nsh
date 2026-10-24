@@ -56,6 +56,8 @@
   WriteRegStr SHCTX "${ODAK_CM}" "MUIVerb" "$R7"
   WriteRegStr SHCTX "${ODAK_CM}" "Icon" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}",0'
   WriteRegStr SHCTX "${ODAK_CM}" "SubCommands" ""
+  WriteRegStr SHCTX "${ODAK_CM}\shell\0quality" "MUIVerb" "$R9"
+  WriteRegStr SHCTX "${ODAK_CM}\shell\0quality\command" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" --compress=quality "%1"'
   WriteRegStr SHCTX "${ODAK_CM}\shell\1discord" "MUIVerb" "Discord · 10 MB"
   WriteRegStr SHCTX "${ODAK_CM}\shell\1discord\command" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" --compress=discord "%1"'
   WriteRegStr SHCTX "${ODAK_CM}\shell\2whatsapp" "MUIVerb" "WhatsApp · 16 MB"
@@ -99,9 +101,11 @@
   System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'
   StrCpy $R7 "Shrink with Odak"
   StrCpy $R8 "Email · 25 MB"
-  IntCmp $0 1055 0 +3 +3
+  StrCpy $R9 "Keep quality (same resolution)"
+  IntCmp $0 1055 0 +4 +4
     StrCpy $R7 "Odak ile küçült"
     StrCpy $R8 "E-posta · 25 MB"
+    StrCpy $R9 "Kaliteyi koru (çözünürlük aynı)"
   !insertmacro odakForEachVideoExtension odakCompressMenu
   ; Gezgin'e dosya ilişkilerinin değiştiğini bildir.
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'

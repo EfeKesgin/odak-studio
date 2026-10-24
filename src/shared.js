@@ -185,6 +185,9 @@
   const VIDEO_MAX_EDGES = [0, 3840, 2560, 1920, 1280, 854, 640];
   const VIDEO_PRESETS = [
     { id: 'lossless', name: 'Kayıpsız kopya', settings: { quality: 'copy' } },
+    // Çözünürlük aynı kalır; şişkin (gereğinden yüksek bit hızlı) videolar
+    // gözle ayırt edilemeyecek kalitede verimli sıkıştırılır (SSIM ~0,99).
+    { id: 'quality', name: 'Kaliteyi koru · küçült', settings: { codec: 'h264', quality: 'crf', crf: 20, preset: 'medium' } },
     { id: 'youtube', name: 'YouTube · 1080p', settings: { codec: 'h264', quality: 'crf', crf: 18, preset: 'slow', maxEdge: 1920 } },
     { id: 'social', name: 'Instagram / TikTok · 1080p', settings: { codec: 'h264', quality: 'crf', crf: 20, preset: 'medium', maxEdge: 1920 } },
     { id: 'whatsapp', name: 'WhatsApp · 16 MB', settings: { codec: 'h264', quality: 'size', targetMB: 15.5, preset: 'medium', maxEdge: 1280 } },

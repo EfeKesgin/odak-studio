@@ -471,6 +471,11 @@ assert.strictEqual(portrait.resize, null, 'kucuk video buyutulmez');
 assert.strictEqual(portrait.audioMode, 'none');
 assert.strictEqual(quick.quickCompressOptions({ width: 3840, height: 2160, duration: 9 }, 'email').resize, null, 'e-posta ayarinda boyut siniri yok');
 assert.strictEqual(quick.quickCompressBaseName('C:/v/tatil.mp4', 'email'), 'tatil-eposta');
+const keep = quick.quickCompressOptions({ width: 3840, height: 2160, duration: 8, size: 45e6, hasAudio: true }, 'quality');
+assert.strictEqual(keep.mode, 'crf');
+assert.strictEqual(keep.crf, 20);
+assert.strictEqual(keep.resize, null, 'kaliteyi koru cozunurluge dokunmaz');
+assert.deepStrictEqual(quick.compressRequestFromArgs(['odak.exe', '--compress=quality', thisFile], () => true).preset, 'quality');
 assert.strictEqual(quick.quickCompressOptions({ width: 1920, height: 1080, duration: 30, size: 13e6 }, 'whatsapp').resize, null,
   'hedefe zaten sigan video kucultulmez, kopyalanir');
 

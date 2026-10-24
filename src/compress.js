@@ -10,6 +10,7 @@
   const title = document.getElementById('compressTitle');
 
   const PRESET_LABELS = {
+    quality: 'Kaliteyi koru',
     discord: 'Discord · 10 MB',
     whatsapp: 'WhatsApp · 16 MB',
     email: 'E-posta · 25 MB',
@@ -36,6 +37,7 @@
     if (item.status === 'running') return `%${Math.round(item.percent || 0)}`;
     if (item.status === 'canceled') return 'İptal edildi';
     if (item.status === 'error') return item.error || 'Küçültme tamamlanamadı.';
+    if (item.alreadyEfficient) return 'Zaten verimli sıkıştırılmış; daha küçük olmuyor, yeni dosya oluşturulmadı.';
     if (item.keptSource) return `${formatSize(item.size)} · zaten küçüktü, olduğu gibi kopyalandı`;
     return `${formatSize(item.sourceSize)} → ${formatSize(item.size)}`;
   }
